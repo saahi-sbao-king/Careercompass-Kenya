@@ -18,7 +18,7 @@ service cloud.firestore {
     }
     
     match /feature_flags/admin_config {
-      allow read: if true;
+      allow read: if isAdmin();
       allow write: if isAdmin();
     }
 
@@ -28,8 +28,7 @@ service cloud.firestore {
     }
 
     match /roles_admin/{userId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     match /users/{userId} {
@@ -53,7 +52,7 @@ service cloud.firestore {
     }
 
     match /users {
-      allow list: if true;
+      allow list, read: if true;
     }
 
     match /{document=**} {
