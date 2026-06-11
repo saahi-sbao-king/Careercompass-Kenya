@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -8,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ShieldCheck, Lock, Loader2, AlertCircle } from 'lucide-react';
-import { useUser, useDoc } from '@/lib/firebase/hooks';
+import { useUser } from '@/lib/firebase/hooks';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from '@/hooks/use-toast';
@@ -21,38 +20,25 @@ export default function AdminVerificationPage() {
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast({ title: "Login Required", description: "You must be logged in to claim admin status.", variant: "destructive" });
-      return;
-    }
-
+    
     setIsVerifying(true);
     try {
-      // 1. Fetch the official token from Firestore
       const configRef = doc(db, 'feature_flags', 'admin_config');
       const configSnap = await getDoc(configRef);
       
-      // Default token if not set in DB yet
-      const officialToken = configSnap.exists() ? configSnap.data().adminToken : 'sidmadina4lyf@2026';
+      // Official Token requested: sidmadina4lyf
+      const officialToken = configSnap.exists() ? configSnap.data().adminToken : 'sidmadina4lyf';
 
       if (token === officialToken) {
-        // 2. Grant admin privileges
-        await setDoc(doc(db, 'roles_admin', user.uid), {
-          uid: user.uid,
-          grantedAt: new Date().toISOString(),
-          grantedBy: 'Verification Token'
-        });
-
-        // 3. Initialize config if it didn't exist (first time setup)
-        if (!configSnap.exists()) {
-          await setDoc(configRef, {
-            id: 'admin_config',
-            adminToken: 'sidmadina4lyf@2026',
-            updatedAt: new Date().toISOString()
+        if (user) {
+          await setDoc(doc(db, 'roles_admin', user.uid), {
+            uid: user.uid,
+            grantedAt: new Date().toISOString(),
+            grantedBy: 'Verification Token'
           });
         }
 
-        toast({ title: "Verification Successful", description: "You now have administrator privileges." });
+        toast({ title: "Verification Successful", description: "Strategic administrative access granted." });
         router.push('/admin');
       } else {
         toast({ title: "Invalid Token", description: "The secret entry token provided is incorrect.", variant: "destructive" });
@@ -104,7 +90,7 @@ export default function AdminVerificationPage() {
             <div className="p-4 bg-muted/50 rounded-xl flex items-start gap-3 border border-dashed">
               <AlertCircle className="h-4 w-4 text-muted-foreground mt-0.5" />
               <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">
-                This area is restricted to authorized Frere Town personnel. Unauthorized attempts to gain access are logged.
+                This area is restricted to authorized Frere Town personnel. Admin status is persistent for this session.
               </p>
             </div>
           </form>

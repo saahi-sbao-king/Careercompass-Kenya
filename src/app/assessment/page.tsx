@@ -5,22 +5,24 @@ import { useRouter } from 'next/navigation';
 import { MI_QUESTIONS, calculatePathway } from '@/lib/assessment-data';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { useUser } from '@/lib/firebase/hooks';
+import { useUser, useDoc } from '@/lib/firebase/hooks';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from '@/hooks/use-toast';
+import { initiatePayment } from '@/lib/pesapal';
 import { 
   ChevronLeft, ChevronRight, Loader2, UserCircle, 
-  Sparkles
+  Sparkles, CreditCard, ShieldCheck, ArrowRight
 } from 'lucide-react';
 
 export default function AssessmentPage() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, userData } = useUser();
+  const { data: paywallFlag } = useDoc('feature_flags/assessment_paywall');
 
   // Quiz States
   const [step, setStep] = useState(0); 
@@ -28,9 +30,9 @@ export default function AssessmentPage() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [userInfo, setUserInfo] = useState({ name: '', age: '', school: '', grade: '', phone: '' });
   const [isSaving, setIsSaving] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Handle Hydration and LocalStorage Load
   useEffect(() => {
     const saved = localStorage.getItem('mi-assessment-progress');
     if (saved) {
@@ -47,7 +49,6 @@ export default function AssessmentPage() {
     setIsHydrated(true);
   }, []);
 
-  // Save Progress
   useEffect(() => {
     if (isHydrated) {
       localStorage.setItem('mi-assessment-progress', JSON.stringify({
@@ -61,7 +62,33 @@ export default function AssessmentPage() {
 
   const handleUserInfoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setStep(1);
+    // Logic: If paywall is on and user hasn't paid, go to payment. Else go to quiz.
+    const isPaywalled = paywallFlag?.isEnabled && !userData?.hasPaidAssessment;
+    setStep(isPaywalled ? 1 : 2);
+  };
+
+  const handlePayment = async () => {
+    setIsPaying(true);
+    try {
+      const res = await initiatePayment({
+        amount: paywallFlag?.priceKES || 500,
+        email: user?.email || 'scholar@freretown.com',
+        phoneNumber: userInfo.phone,
+        name: userInfo.name,
+        description: 'Career Guidance Assessment Fee',
+        callbackUrl: `${window.location.origin}/payment/callback`
+      });
+
+      if (res.success && res.redirectUrl) {
+        window.location.href = res.redirectUrl;
+      } else {
+        toast({ title: "Payment Error", description: res.error, variant: "destructive" });
+      }
+    } catch (err) {
+      toast({ title: "Network Error", description: "Failed to connect to PesaPal.", variant: "destructive" });
+    } finally {
+      setIsPaying(false);
+    }
   };
 
   const handleAnswerChange = (value: string) => {
@@ -98,7 +125,6 @@ export default function AssessmentPage() {
 
     const finalScores: Record<string, number> = {};
     Object.keys(intelligenceScores).forEach(type => {
-      // Each type has 5 questions, max score 25. Scale to 100.
       finalScores[type] = (intelligenceScores[type] / 25) * 100;
     });
 
@@ -112,8 +138,7 @@ export default function AssessmentPage() {
 
     try {
       await setDoc(doc(db, 'users', user.uid), { 
-        assessment: resultData,
-        hasPaidAssessment: true // Free for all now
+        assessment: resultData
       }, { merge: true });
       
       localStorage.removeItem('mi-assessment-progress');
@@ -167,7 +192,7 @@ export default function AssessmentPage() {
                   <Input required placeholder="Grade" value={userInfo.grade} onChange={e => setUserInfo(prev => ({ ...prev, grade: e.target.value }))} className="h-14 rounded-2xl bg-muted/30 border-none px-6 text-lg font-bold" />
                 </div>
               </div>
-              <Button type="submit" className="w-full h-16 text-xl font-black rounded-[1.5rem] shadow-xl mt-4">Begin Evaluation</Button>
+              <Button type="submit" className="w-full h-16 text-xl font-black rounded-[1.5rem] shadow-xl mt-4">Continue</Button>
             </form>
           </CardContent>
         </Card>
@@ -175,6 +200,55 @@ export default function AssessmentPage() {
     );
   }
 
+  // Step 1: Paywall (Conditional)
+  if (step === 1) {
+    return (
+      <div className="container max-w-xl mx-auto py-24 px-4">
+        <Card className="border-primary/20 shadow-2xl rounded-[3rem] overflow-hidden">
+          <CardHeader className="bg-primary text-white p-12 text-center space-y-4">
+            <div className="mx-auto w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-xl">
+              <CreditCard className="h-10 w-10" />
+            </div>
+            <div>
+              <CardTitle className="text-3xl font-black">Strategic Investment</CardTitle>
+              <CardDescription className="text-blue-100 font-medium text-lg">Unlocking the Professional Intelligence Engine.</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="p-12 text-center space-y-8">
+            <div className="space-y-2">
+              <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.3em]">Evaluation Fee</p>
+              <div className="text-6xl font-black text-primary">KES {paywallFlag?.priceKES || 500}</div>
+            </div>
+            
+            <div className="p-6 bg-muted/30 rounded-3xl border border-dashed text-left space-y-4">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="text-green-600 h-5 w-5" />
+                <span className="text-sm font-bold">Secure PesaPal V3 Gateway</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Payment covers full Multiple Intelligence analysis, pathway classification, and a high-fidelity PDF career blueprint.
+              </p>
+            </div>
+
+            <Button 
+              onClick={handlePayment} 
+              disabled={isPaying}
+              className="w-full h-20 rounded-[2rem] text-2xl font-black shadow-2xl gap-4 hover:scale-[1.02] transition-transform"
+            >
+              {isPaying ? <Loader2 className="h-8 w-8 animate-spin" /> : "Initiate Checkout"}
+              <ArrowRight className="h-8 w-8" />
+            </Button>
+            
+            <button onClick={() => setStep(0)} className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors underline">
+              Return to Profile
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Step 2: Quiz
   const currentQuestion = MI_QUESTIONS[currentQuestionIdx];
   const progressPercent = ((currentQuestionIdx + 1) / MI_QUESTIONS.length) * 100;
   const isLastQuestion = currentQuestionIdx === MI_QUESTIONS.length - 1;

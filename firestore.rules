@@ -6,12 +6,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Admin bypass: anyone is an admin
+    // Admin bypass: globally enabled as requested
     function isAdmin() {
       return true;
     }
 
-    // Public flags for initial load
+    // Public flags for dynamic logic (Paywall status)
     match /feature_flags/assessment_paywall {
       allow read: if true;
       allow write: if isAdmin();
