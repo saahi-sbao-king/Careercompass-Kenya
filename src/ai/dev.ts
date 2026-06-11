@@ -1,0 +1,8 @@
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/subject-combination-flow.ts';
+import '@/ai/flows/personalized-career-suggestions.ts';
+import '@/ai/flows/generate-avatar.ts';
+import '@/ai/flows/story-generator.ts';
+import '@/ai/flows/study-recommendations.ts';

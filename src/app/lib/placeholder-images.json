@@ -1,0 +1,107 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero",
+      "description": "The Frere Town Secondary School student body and staff in front of the main building",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1770646500/f4622860-f528-4e66-9228-c88c473762f9_xkl5gx.jpg",
+      "imageHint": "Kenyan students"
+    },
+    {
+      "id": "school-group",
+      "description": "Kenyan secondary school students in uniform at Frere Town Secondary School standing in front of the school building",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1770646479/e78d29cf-b4ca-4744-b8ed-17db03408bf8_w6mylr.jpg",
+      "imageHint": "Kenyan students"
+    },
+    {
+      "id": "frere-town-main",
+      "description": "The Frere Town Secondary School student body and staff in front of the main building",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1770646500/f4622860-f528-4e66-9228-c88c473762f9_xkl5gx.jpg",
+      "imageHint": "Kenyan students"
+    },
+    {
+      "id": "school-logo",
+      "description": "Official logo of Frere Town Secondary School",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1774685282/a78ac73a-7f5c-4dcb-a51e-5810c3994de2.png",
+      "imageHint": "school logo"
+    },
+    {
+      "id": "app-logo",
+      "description": "CareerCompass App Logo",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1774685282/a78ac73a-7f5c-4dcb-a51e-5810c3994de2.png",
+      "imageHint": "brand logo"
+    },
+    {
+      "id": "tech",
+      "description": "Advanced artificial intelligence and digital innovation representing the future of technology",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1772556298/image_d2d68b6d-d725-4faa-ada6-3596f05beccd_aop9dt.png",
+      "imageHint": "artificial intelligence"
+    },
+    {
+      "id": "health",
+      "description": "Modern healthcare services and professional medical practice",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1772556249/image_2b124809-8e22-4d1c-bf5e-0c414558730b_esvg9v.png",
+      "imageHint": "healthcare medicine"
+    },
+    {
+      "id": "finance",
+      "description": "Professional banking, investment, and financial management services",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1772556321/image_184174ea-3cb6-4e03-9058-bf12f3b50841_rvqtvj.png",
+      "imageHint": "banking finance"
+    },
+    {
+      "id": "creative",
+      "description": "Vibrant and expressive visual and performing arts representation",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1772556206/image_b7755f20-6d07-4ec8-8a1e-3c51f523f466_r54joq.png",
+      "imageHint": "creative arts"
+    },
+    {
+      "id": "law",
+      "description": "Dignified representation of Law, Governance, and Justice in the Kenyan context",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1772556030/d352d72e-8291-4e6f-8c9d-e6e2397d008b.png",
+      "imageHint": "law justice"
+    },
+    {
+      "id": "agri",
+      "description": "Modern agribusiness and sustainable agricultural practices in Kenya",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1772556150/image_eadcd0b6-bafc-458b-ae93-6287720cb051_dftnhm.png",
+      "imageHint": "modern agriculture"
+    },
+    {
+      "id": "eng",
+      "description": "Advanced engineering solutions and infrastructure development in Kenya",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1772556476/download_skzanb.jpg",
+      "imageHint": "civil engineering"
+    },
+    {
+      "id": "edu",
+      "description": "Interactive and modern learning environments for quality education",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1772556153/image_ec20da60-e2bf-404a-8fef-6af7b0bc4448_cnqutd.png",
+      "imageHint": "teaching education"
+    },
+    {
+      "id": "aviation",
+      "description": "Advanced commercial aviation and aerospace technology in Kenya",
+      "imageUrl": "https://res.cloudinary.com/dhsue55pd/image/upload/v1774690458/83f02628-3c66-4802-8216-37d19af311fb.png",
+      "imageHint": "aviation aerospace"
+    },
+    {
+      "id": "maritime",
+      "description": "The thriving Blue Economy and maritime operations in coastal Kenya",
+      "imageUrl": "https://images.unsplash.com/photo-1524522173746-f628baad3644?q=80&w=1000&auto=format&fit=crop",
+      "imageHint": "maritime ocean"
+    },
+    {
+      "id": "hospitality",
+      "description": "World-class hospitality and tourism experiences in the Kenyan landscape",
+      "imageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+      "imageHint": "hotel resort"
+    },
+    {
+      "id": "security",
+      "description": "Dedicated public service and security infrastructure for national stability",
+      "imageUrl": "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1000&auto=format&fit=crop",
+      "imageHint": "security protection"
+    }
+  ]
+}

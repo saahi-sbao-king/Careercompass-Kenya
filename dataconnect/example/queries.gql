@@ -1,0 +1,28 @@
+mutation CreateJobApplication($companyId: UUID!, $userId: UUID!, $applicationDate: Date!, $positionTitle: String!, $status: String!) @auth(level: USER) {
+  jobApplication_insert(data: {companyId: $companyId, userId: $userId, applicationDate: $applicationDate, positionTitle: $positionTitle, status: $status})
+}
+
+query GetJobApplicationsByUser($userId: UUID!) @auth(level: USER) {
+  jobApplications(where: {userId: {eq: $userId}}) {
+    id
+    company {
+      name
+    }
+    applicationDate
+    positionTitle
+    status
+  }
+}
+
+mutation UpdateJobApplicationStatus($id: UUID!, $status: String!) @auth(level: USER) {
+  jobApplication_update(key: {id: $id}, data: {status: $status})
+}
+
+query ListCompanies @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  companies {
+    id
+    name
+    industry
+    website
+  }
+}

@@ -1,0 +1,242 @@
+
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user profile in the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user.",
+          "format": "uuid"
+        },
+        "username": {
+          "type": "string",
+          "description": "The username of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user.",
+          "format": "email"
+        },
+        "role": {
+          "type": "string",
+          "description": "The role of the user (Student, Teacher, Admin)."
+        },
+        "avatarUrl": {
+          "type": "string",
+          "description": "URL of the user's avatar image.",
+          "format": "uri"
+        },
+        "hasPaidAssessment": {
+          "type": "boolean",
+          "description": "Indicates if the user has paid for the premium assessment."
+        },
+        "assessmentId": {
+          "type": "string",
+          "description": "Reference to Assessment. (Relationship: User 1:1 Assessment)"
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "email",
+        "role"
+      ]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "type": "object",
+      "description": "Stores PesaPal payment records.",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "orderTrackingId": { "type": "string" },
+        "merchantReference": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Assessment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Assessment",
+      "type": "object",
+      "description": "Stores the results of a user's career assessment.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the assessment."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:1 Assessment)"
+        },
+        "primaryPathway": {
+          "type": "string",
+          "description": "The recommended career pathway based on the assessment (STEM, Arts & Sports Science, Social Sciences)."
+        },
+        "confidenceScore": {
+          "type": "number",
+          "description": "A score indicating the confidence level of the pathway recommendation."
+        },
+        "scores": {
+          "type": "object",
+          "description": "MI individual scores"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "primaryPathway",
+        "confidenceScore"
+      ]
+    },
+    "CareerInterest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CareerInterest",
+      "type": "object",
+      "description": "Represents a career field that a user is interested in.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the career interest."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N CareerInterest)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the career field (e.g., Technology, Healthcare)."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the career field."
+        },
+        "emojiIcon": {
+          "type": "string",
+          "description": "An emoji representing the career field."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name",
+        "description",
+        "emojiIcon"
+      ]
+    },
+    "StudyLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "StudyLog",
+      "type": "object",
+      "description": "Represents a study session logged by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the study log."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N StudyLog)"
+        },
+        "subject": {
+          "type": "string",
+          "description": "The subject studied during the session."
+        },
+        "duration": {
+          "type": "number",
+          "description": "The duration of the study session in minutes."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date of the study session.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "subject",
+        "duration",
+        "date"
+      ]
+    },
+    "FeatureFlag": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "FeatureFlag",
+      "type": "object",
+      "description": "Represents a feature flag or system configuration.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the flag (e.g., storyGenerator, assessment_paywall, admin_config)."
+        },
+        "isEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether the feature is enabled."
+        },
+        "priceKES": {
+          "type": "number",
+          "description": "The price of the feature in KES."
+        },
+        "adminToken": {
+          "type": "string",
+          "description": "The secret token used to claim admin privileges."
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous",
+      "google.com"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile data."
+        }
+      },
+      {
+        "path": "/transactions/{txId}",
+        "definition": {
+          "entityName": "Transaction",
+          "description": "Stores payment records."
+        }
+      },
+      {
+        "path": "/feature_flags/{flagId}",
+        "definition": {
+          "entityName": "FeatureFlag",
+          "schema": {
+            "$ref": "#/backend/entities/FeatureFlag"
+          },
+          "description": "Stores system settings including admin tokens and paywalls."
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "User",
+          "description": "Whitelist for admin access."
+        }
+      }
+    ],
+    "reasoning": "Standard structure with centralized feature flags and transaction auditing for assessment monetization."
+  }
+}

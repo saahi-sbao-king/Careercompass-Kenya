@@ -1,0 +1,40 @@
+type User @table {
+  displayName: String!
+  email: String!
+  createdAt: Timestamp!
+  photoUrl: String
+}
+
+type Company @table {
+  user: User!
+  name: String!
+  createdAt: Timestamp!
+  website: String
+  industry: String
+  notes: String
+}
+
+type JobApplication @table {
+  user: User!
+  company: Company!
+  positionTitle: String!
+  status: String! # APPLIED, INTERVIEWING, OFFER_RECEIVED, REJECTED, ARCHIVED
+  applicationDate: Date!
+  createdAt: Timestamp!
+  jobLink: String
+  location: String
+  salaryExpectation: Int64
+  notes: String
+}
+
+type Interview @table {
+  user: User!
+  jobApplication: JobApplication!
+  interviewDate: Timestamp!
+  interviewType: String! # PHONE_SCREEN, VIRTUAL_ONSITE, IN_PERSON, TECHNICAL, HIRING_MANAGER
+  createdAt: Timestamp!
+  interviewerNames: String
+  meetingLink: String
+  notes: String
+  feedback: String
+}
