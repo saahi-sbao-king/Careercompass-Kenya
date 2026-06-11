@@ -36,8 +36,13 @@ export function useUser() {
       setLoading(false);
     }, (error) => {
       console.error("[useUser] Firestore Error:", error);
-      // We don't emit permission-error here to avoid crashing the whole app 
-      // if a user profile hasn't been created yet.
+      if (error.code === 'permission-denied') {
+        const contextualError = new FirestorePermissionError({
+          operation: 'get',
+          path: `users/${user.uid}`
+        });
+        errorEmitter.emit('permission-error', contextualError);
+      }
       setLoading(false);
     });
 

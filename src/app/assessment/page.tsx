@@ -22,7 +22,9 @@ import {
 export default function AssessmentPage() {
   const router = useRouter();
   const { user, userData } = useUser();
-  const { data: paywallFlag } = useDoc('feature_flags/assessment_paywall');
+  
+  // Use the central hook for feature flags
+  const { data: paywallFlag, loading: flagLoading } = useDoc('feature_flags/assessment_paywall');
 
   // Quiz States
   const [step, setStep] = useState(0); 
@@ -151,7 +153,7 @@ export default function AssessmentPage() {
     }
   };
 
-  if (!isHydrated) {
+  if (!isHydrated || flagLoading) {
     return <div className="p-24 text-center"><Loader2 className="animate-spin h-12 w-12 text-primary mx-auto" /></div>;
   }
 

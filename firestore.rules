@@ -2,48 +2,18 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function for administrative access
-    // This allows global read/write as requested for the Admin Command Center
-    function isAdmin() {
-      return true;
-    }
-
-    // Publicly readable flags for application logic (e.g. Paywall status)
-    match /feature_flags/{flagId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // User profiles and nested subcollections
-    match /users/{userId} {
-      allow read, write: if true;
-      
-      match /careerInterests/{interestId} {
-        allow read, write: if true;
-      }
-      
-      match /studyLogs/{logId} {
-        allow read, write: if true;
-      }
-    }
-
-    // Transactions and payment records
-    match /transactions/{txId} {
-      allow read, write: if true;
-    }
-
-    // Role assignments
-    match /roles_admin/{userId} {
-      allow read, write: if true;
-    }
-
-    // Assessment results
-    match /assessments/{assessmentId} {
-      allow read, write: if true;
-    }
-
-    // Catch-all permissive rule for any other documents
+    /**
+     * GLOBAL ADMINISTRATIVE ACCESS
+     * As requested, the system is now fully permissive to allow management
+     * without authentication requirements. This applies to all collections.
+     */
     match /{document=**} {
+      allow read, write: if true;
+    }
+    
+    // Explicit rule for feature flags to ensure system logic (like paywalls) 
+    // can always be checked regardless of auth state.
+    match /feature_flags/{flagId} {
       allow read, write: if true;
     }
   }
