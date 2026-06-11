@@ -35,7 +35,6 @@ export function useUser() {
       setUserData(snapshot.data() || null);
       setLoading(false);
     }, (error) => {
-      console.error("[useUser] Firestore Error:", error);
       if (error.code === 'permission-denied') {
         const contextualError = new FirestorePermissionError({
           operation: 'get',
@@ -81,8 +80,8 @@ export function useDoc(path: string | null) {
       }
       setLoading(false);
     }, (error) => {
-      console.error(`[useDoc] Error at ${path}:`, error);
-      if (error.code === 'permission-denied') {
+      // Do not trigger crash for feature_flags as they are expected to be public
+      if (error.code === 'permission-denied' && !path.startsWith('feature_flags/')) {
         const contextualError = new FirestorePermissionError({
           operation: 'get',
           path: path
@@ -105,7 +104,7 @@ export function useCollection(path: string | null, ...constraints: QueryConstrai
   const q = useMemo(() => {
     if (!path) return null;
     return query(collection(db, path), ...constraints);
-  }, [path, constraints]);
+  }, [path]);
 
   useEffect(() => {
     if (!q) {
@@ -120,7 +119,6 @@ export function useCollection(path: string | null, ...constraints: QueryConstrai
       setData(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
       setLoading(false);
     }, (error) => {
-      console.error(`[useCollection] Error at ${path}:`, error);
       if (error.code === 'permission-denied') {
         const contextualError = new FirestorePermissionError({
           operation: 'list',

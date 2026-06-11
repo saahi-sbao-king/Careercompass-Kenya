@@ -64,8 +64,8 @@ export default function AssessmentPage() {
 
   const handleUserInfoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic: If paywall is on and user hasn't paid, go to payment. Else go to quiz.
-    const isPaywalled = paywallFlag?.isEnabled && !userData?.hasPaidAssessment;
+    // Logic: If paywall is enabled in Admin AND user hasn't paid, go to payment. Else proceed.
+    const isPaywalled = paywallFlag?.isEnabled === true && !userData?.hasPaidAssessment;
     setStep(isPaywalled ? 1 : 2);
   };
 
