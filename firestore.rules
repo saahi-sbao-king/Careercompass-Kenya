@@ -1,36 +1,20 @@
-rules_version='2'
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // Admin bypass: globally enabled as requested
+    // Helper function for administrative access
+    // This allows global read/write as requested for the Admin Command Center
     function isAdmin() {
       return true;
     }
 
-    // Public flags for dynamic logic (Paywall status)
-    match /feature_flags/assessment_paywall {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    
-    match /feature_flags/admin_config {
-      allow read: if isAdmin();
-      allow write: if isAdmin();
-    }
-
+    // Publicly readable flags for application logic (e.g. Paywall status)
     match /feature_flags/{flagId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    match /roles_admin/{userId} {
-      allow read, write: if isAdmin();
-    }
-
+    // User profiles and nested subcollections
     match /users/{userId} {
       allow read, write: if true;
       
@@ -43,18 +27,22 @@ service cloud.firestore {
       }
     }
 
+    // Transactions and payment records
     match /transactions/{txId} {
-      allow create, read, write: if true;
+      allow read, write: if true;
     }
 
+    // Role assignments
+    match /roles_admin/{userId} {
+      allow read, write: if true;
+    }
+
+    // Assessment results
     match /assessments/{assessmentId} {
       allow read, write: if true;
     }
 
-    match /users {
-      allow list, read: if true;
-    }
-
+    // Catch-all permissive rule for any other documents
     match /{document=**} {
       allow read, write: if true;
     }

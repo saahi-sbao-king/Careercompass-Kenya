@@ -35,11 +35,9 @@ export function useUser() {
       setUserData(snapshot.data() || null);
       setLoading(false);
     }, (error) => {
-      const contextualError = new FirestorePermissionError({
-        operation: 'get',
-        path: `users/${user.uid}`
-      });
-      errorEmitter.emit('permission-error', contextualError);
+      console.error("[useUser] Firestore Error:", error);
+      // We don't emit permission-error here to avoid crashing the whole app 
+      // if a user profile hasn't been created yet.
       setLoading(false);
     });
 
@@ -51,7 +49,7 @@ export function useUser() {
 
 /**
  * Administrative Access Hook
- * Updated: Always returns true to bypass authentication requirements for admin roles.
+ * Forced to true for global administrative access as requested.
  */
 export function useIsAdmin() {
   return { isAdmin: true, loading: false };
@@ -71,14 +69,21 @@ export function useDoc(path: string | null) {
     setLoading(true);
     
     const unsubscribe = onSnapshot(doc(db, path), (snapshot) => {
-      setData(snapshot.data() || null);
+      if (snapshot.exists()) {
+        setData({ id: snapshot.id, ...snapshot.data() });
+      } else {
+        setData(null);
+      }
       setLoading(false);
     }, (error) => {
-      const contextualError = new FirestorePermissionError({
-        operation: 'get',
-        path: path
-      });
-      errorEmitter.emit('permission-error', contextualError);
+      console.error(`[useDoc] Error at ${path}:`, error);
+      if (error.code === 'permission-denied') {
+        const contextualError = new FirestorePermissionError({
+          operation: 'get',
+          path: path
+        });
+        errorEmitter.emit('permission-error', contextualError);
+      }
       setLoading(false);
     });
 
@@ -110,11 +115,14 @@ export function useCollection(path: string | null, ...constraints: QueryConstrai
       setData(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
       setLoading(false);
     }, (error) => {
-      const contextualError = new FirestorePermissionError({
-        operation: 'list',
-        path: path || 'unknown'
-      });
-      errorEmitter.emit('permission-error', contextualError);
+      console.error(`[useCollection] Error at ${path}:`, error);
+      if (error.code === 'permission-denied') {
+        const contextualError = new FirestorePermissionError({
+          operation: 'list',
+          path: path || 'unknown'
+        });
+        errorEmitter.emit('permission-error', contextualError);
+      }
       setLoading(false);
     });
 
