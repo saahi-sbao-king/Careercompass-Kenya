@@ -39,7 +39,11 @@ async function getAuthToken() {
 
 async function registerIPN(token: string) {
   try {
-    const baseUrl = 'https://career-navigator-00.web.app';
+    // Dynamically detect deployment URL for Vercel or Fallback
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : (process.env.NEXT_PUBLIC_BASE_URL || 'https://career-navigator-00.web.app');
+    
     const ipnUrl = `${baseUrl}/api/pesapal/ipn`;
 
     const response = await fetch(`${PESAPAL_URL}/api/URLRegister/RegisterIPN`, {
