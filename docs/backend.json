@@ -1,11 +1,10 @@
-
 {
   "entities": {
     "User": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a guest profile (formerly user profile).",
+      "description": "Represents a guest student profile managed via localStorage ID.",
       "properties": {
         "id": {
           "type": "string",
@@ -19,53 +18,27 @@
           "type": "string",
           "description": "The role of the user (defaults to Student)."
         },
-        "hasPaidAssessment": {
-          "type": "boolean",
-          "description": "Indicates if the guest has paid for the premium assessment."
-        },
         "assessment": {
           "type": "object",
-          "description": "The results of the career assessment."
+          "description": "The high-fidelity results of the career evaluation including intelligence scores and recommended pathway."
         }
-      }
-    },
-    "Transaction": {
-      "title": "Transaction",
-      "type": "object",
-      "description": "Stores PesaPal payment records.",
-      "properties": {
-        "id": { "type": "string" },
-        "guestId": { "type": "string" },
-        "orderTrackingId": { "type": "string" },
-        "merchantReference": { "type": "string" },
-        "amount": { "type": "number" },
-        "status": { "type": "string" },
-        "createdAt": { "type": "string", format: "date-time" }
       }
     },
     "FeatureFlag": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "FeatureFlag",
       "type": "object",
-      "description": "Represents a system configuration.",
+      "description": "Represents dynamic system configurations.",
       "properties": {
-        "id": {
-          "type": "string"
-        },
-        "isEnabled": {
-          "type": "boolean"
-        },
-        "priceKES": {
-          "type": "number"
-        },
-        "adminToken": {
-          "type": "string"
-        }
+        "id": { "type": "string" },
+        "isEnabled": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       }
     }
   },
   "auth": {
-    "providers": []
+    "providers": ["google"],
+    "reasoning": "Auth.js (NextAuth v5) integrated for dashboard protection and student data synchronization."
   },
   "firestore": {
     "structure": [
@@ -76,7 +49,7 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores guest profile data."
+          "description": "Stores guest profile and assessment data."
         }
       },
       {
@@ -86,10 +59,10 @@
           "schema": {
             "$ref": "#/backend/entities/FeatureFlag"
           },
-          "description": "Public configuration flags."
+          "description": "Public configuration for system behaviors."
         }
       }
     ],
-    "reasoning": "Authentication removed. All paths are publicly accessible to allow anonymous use of the career guidance tools while maintaining persistent data via localStorage Guest IDs."
+    "reasoning": "All assessment paths are publicly accessible to empower Frere Town students with free guidance. Admin paths are secured via device-level token verification."
   }
 }
