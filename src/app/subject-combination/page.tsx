@@ -10,10 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from '@/hooks/use-toast';
 import { 
   Target, Calculator, BookOpen, Sparkles, Loader2, ListChecks, 
-  Landmark, Microscope, Languages, Trophy
+  Landmark, Microscope, Languages, Trophy, ShieldCheck, Zap,
+  Cpu, Rocket, FlaskConical, Plane
 } from 'lucide-react';
 import { exploreSubjectCombinations } from '@/ai/flows/subject-combination-flow';
 
@@ -61,7 +63,10 @@ export default function SubjectExplorerFinal() {
   return (
     <div className="container mx-auto py-12 px-4 max-w-7xl">
       <div className="text-center mb-16 space-y-4">
-        <h1 className="text-5xl font-headline font-black tracking-tight text-primary">Subject Combination Navigator</h1>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-black uppercase tracking-widest mb-4">
+          <ShieldCheck className="h-4 w-4" /> KICD CBE Specialized Tool
+        </div>
+        <h1 className="text-5xl md:text-7xl font-headline font-black tracking-tight text-primary">Subject Navigator</h1>
         <p className="text-muted-foreground text-xl max-w-2xl mx-auto font-medium">Pathfinder AI v3.0: Formal KICD CBE subject mapping and cluster analysis.</p>
       </div>
 
@@ -177,16 +182,119 @@ export default function SubjectExplorerFinal() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="catalogue">
+            <TabsContent value="catalogue" className="space-y-12">
+              <div className="p-10 bg-blue-950 text-white rounded-[3rem] shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-12 opacity-5"><FlaskConical className="h-64 w-64" /></div>
+                <div className="relative z-10 space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-xl"><Microscope className="h-8 w-8 text-blue-300" /></div>
+                    <h2 className="text-4xl font-black">STEM Framework</h2>
+                  </div>
+                  <p className="text-lg opacity-80 max-w-3xl leading-relaxed">
+                    The Science, Technology, Engineering and Mathematics (STEM) Framework is a premier senior school pathway in Kenya's CBE system, designed for scientific innovation and technical leadership.
+                  </p>
+                </div>
+              </div>
+
               <div className="grid md:grid-cols-2 gap-10">
-                <Card className="rounded-[3rem] shadow-2xl bg-blue-950 text-white overflow-hidden">
-                  <CardHeader className="p-8 border-b border-white/10"><CardTitle className="text-xl font-black flex items-center gap-3"><Microscope className="h-6 w-6 text-blue-400" /> STEM Framework</CardTitle></CardHeader>
-                  <CardContent className="p-8"><p className="text-sm font-medium leading-relaxed opacity-80">Official pure and applied science tracks for Grade 10 specialization.</p></CardContent>
+                <Card className="rounded-[3rem] border-none shadow-xl overflow-hidden flex flex-col group">
+                  <div className="h-2 w-full bg-blue-500" />
+                  <CardHeader className="bg-muted/30 p-10">
+                    <CardTitle className="text-2xl font-black flex items-center gap-3"><FlaskConical className="text-blue-500" /> Pure Sciences Track</CardTitle>
+                    <CardDescription className="font-bold">Focus: Scientific theory, medicine, and research.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-10 space-y-8 flex-grow">
+                    <div className="space-y-4">
+                      <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Subjects Offered</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {["Advanced Mathematics", "Biology", "Chemistry", "Physics"].map(s => <Badge key={s} variant="outline" className="rounded-lg">{s}</Badge>)}
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Core Careers</h4>
+                      <ul className="grid grid-cols-2 gap-2 text-sm font-bold text-slate-700">
+                        <li>• Medicine & Surgery</li>
+                        <li>• Pharmacy</li>
+                        <li>• Biomedical Science</li>
+                        <li>• Biotechnology</li>
+                        <li>• Genetics</li>
+                        <li>• Environmental Science</li>
+                      </ul>
+                    </div>
+                  </CardContent>
                 </Card>
-                <Card className="rounded-[3rem] shadow-2xl bg-slate-900 text-white overflow-hidden">
-                  <CardHeader className="p-8 border-b border-white/10"><CardTitle className="text-xl font-black flex items-center gap-3"><Languages className="h-6 w-6 text-sky-400" /> Social Sciences</CardTitle></CardHeader>
-                  <CardContent className="p-8"><p className="text-sm font-medium leading-relaxed opacity-80">Official humanities, languages, and business specialization tracks.</p></CardContent>
+
+                <Card className="rounded-[3rem] border-none shadow-xl overflow-hidden flex flex-col group">
+                  <div className="h-2 w-full bg-emerald-500" />
+                  <CardHeader className="bg-muted/30 p-10">
+                    <CardTitle className="text-2xl font-black flex items-center gap-3"><Cpu className="text-emerald-500" /> Applied Sciences Track</CardTitle>
+                    <CardDescription className="font-bold">Focus: Practical application, engineering, and tech.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-10 space-y-8 flex-grow">
+                    <div className="space-y-4">
+                      <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Subjects Offered</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {["Advanced Mathematics", "Physics", "Chemistry", "Computer Science", "Engineering Studies", "Aviation Studies"].map(s => <Badge key={s} variant="outline" className="rounded-lg">{s}</Badge>)}
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Core Careers</h4>
+                      <ul className="grid grid-cols-2 gap-2 text-sm font-bold text-slate-700">
+                        <li>• Software Engineering</li>
+                        <li>• Artificial Intelligence</li>
+                        <li>• Civil Engineering</li>
+                        <li>• Robotics</li>
+                        <li>• Architecture</li>
+                        <li>• Renewable Energy</li>
+                      </ul>
+                    </div>
+                  </CardContent>
                 </Card>
+              </div>
+
+              <Card className="rounded-[3rem] border-none shadow-2xl p-10 bg-primary text-white">
+                <div className="grid md:grid-cols-3 gap-10">
+                  <div className="md:col-span-2 space-y-6">
+                    <h3 className="text-3xl font-black flex items-center gap-3"><Zap className="text-secondary" /> STEM Competencies</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        "Critical Thinking", "Problem Solving", "Digital Literacy",
+                        "Scientific Inquiry", "Research Skills", "Engineering Design"
+                      ].map(c => (
+                        <div key={c} className="flex items-center gap-3 text-sm font-bold">
+                          <div className="h-1.5 w-1.5 rounded-full bg-secondary" /> {c}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="p-8 bg-white/10 rounded-[2.5rem] border border-white/20">
+                    <h4 className="text-xs font-black uppercase tracking-widest mb-4">Sample Combination</h4>
+                    <Table>
+                      <TableBody>
+                        <TableRow className="border-white/10"><TableCell className="font-bold py-2">English</TableCell><TableCell className="text-xs text-blue-200">Core</TableCell></TableRow>
+                        <TableRow className="border-white/10"><TableCell className="font-bold py-2">Math</TableCell><TableCell className="text-xs text-blue-200">STEM</TableCell></TableRow>
+                        <TableRow className="border-white/10"><TableCell className="font-bold py-2">Physics</TableCell><TableCell className="text-xs text-blue-200">STEM</TableCell></TableRow>
+                        <TableRow className="border-white/0"><TableCell className="font-bold py-2">Comp Science</TableCell><TableCell className="text-xs text-blue-200">STEM</TableCell></TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </Card>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                {[
+                  { label: "AI Specialist", icon: Cpu },
+                  { label: "Drone Expert", icon: Rocket },
+                  { label: "Space Scientist", icon: FlaskConical },
+                  { label: "Renewable Eng", icon: Zap }
+                ].map(item => (
+                  <div key={item.label} className="p-6 bg-white rounded-[2rem] shadow-lg border border-primary/5 flex flex-col items-center gap-4 text-center group hover:-translate-y-1 transition-all">
+                    <div className="p-4 bg-primary/5 rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors">
+                      <item.icon className="h-6 w-6" />
+                    </div>
+                    <span className="font-black text-xs uppercase tracking-tighter">{item.label}</span>
+                  </div>
+                ))}
               </div>
             </TabsContent>
           </Tabs>
