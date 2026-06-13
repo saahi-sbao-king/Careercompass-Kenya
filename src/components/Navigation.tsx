@@ -1,17 +1,18 @@
-
 "use client";
 
 import Link from 'next/link';
 import { useIsAdmin } from '@/lib/firebase/hooks';
 import { Button } from '@/components/ui/button';
-import { Compass, Menu, X, ShieldCheck, ArrowLeft, Search, Target } from 'lucide-react';
+import { Compass, Menu, X, ShieldCheck, ArrowLeft, Search, Target, UserPlus, LogIn } from 'lucide-react';
 import { useState } from 'react';
 import { AccessibilityOptions } from '@/components/AccessibilityOptions';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useSession, signIn } from "next-auth/react";
 
 export function Navigation() {
+  const { data: session } = useSession();
   const { isAdmin } = useIsAdmin();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -55,11 +56,32 @@ export function Navigation() {
           <Link href="/subject-combination" className="text-sm font-black text-primary hover:opacity-80 transition-colors px-3 py-1.5 rounded-full hover:bg-primary/5">Subject Explorer</Link>
           <Link href="/pathways" className="text-sm font-black text-primary hover:opacity-80 transition-colors px-3 py-1.5 rounded-full hover:bg-primary/5">Pathways</Link>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 pl-4 border-l">
             <AccessibilityOptions />
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="font-black text-primary hover:bg-primary/10">Dashboard</Button>
-            </Link>
+            {session ? (
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" className="font-black text-primary hover:bg-primary/10">Dashboard</Button>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="font-black text-primary gap-2"
+                  onClick={() => signIn("google")}
+                >
+                  <LogIn className="h-4 w-4" /> Sign In
+                </Button>
+                <Button 
+                  size="sm" 
+                  className="font-black gap-2 rounded-xl px-5"
+                  onClick={() => signIn("google")}
+                >
+                  <UserPlus className="h-4 w-4" /> Sign Up
+                </Button>
+              </div>
+            )}
+            
             {isAdmin && (
               <Link href="/admin">
                 <Button variant="outline" size="sm" className="gap-2 border-primary/20 text-primary font-black hover:bg-primary/5">
@@ -84,7 +106,20 @@ export function Navigation() {
           <Link href="/exploration" onClick={() => setIsMenuOpen(false)} className="font-black text-primary text-lg">Explore Ecosystems</Link>
           <Link href="/subject-combination" onClick={() => setIsMenuOpen(false)} className="font-black text-primary text-lg">Subject Explorer</Link>
           <Link href="/pathways" onClick={() => setIsMenuOpen(false)} className="font-black text-primary text-lg">CBE Pathways</Link>
-          <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="font-black text-primary text-lg flex items-center gap-3"><Target className="h-5 w-5" /> Dashboard</Link>
+          
+          <div className="pt-4 border-t space-y-3">
+            {session ? (
+              <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="font-black text-primary text-lg flex items-center gap-3"><Target className="h-5 w-5" /> Dashboard</Link>
+            ) : (
+              <>
+                <button onClick={() => signIn("google")} className="w-full text-left font-black text-primary text-lg flex items-center gap-3"><LogIn className="h-5 w-5" /> Sign In</button>
+                <button onClick={() => signIn("google")} className="w-full text-left font-black text-primary text-lg flex items-center gap-3"><UserPlus className="h-5 w-5" /> Sign Up</button>
+              </>
+            )}
+            {isAdmin && (
+              <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="font-black text-primary text-lg flex items-center gap-3"><ShieldCheck className="h-5 w-5" /> Admin</Link>
+            )}
+          </div>
         </div>
       )}
     </nav>

@@ -42,8 +42,16 @@ export function useGuestUser() {
 }
 
 export function useIsAdmin() {
-  // Global Admin Access enabled by Sidmadina Technologies
-  return { isAdmin: true, loading: false };
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const verified = typeof window !== 'undefined' && localStorage.getItem('cck_admin_verified') === 'true';
+    setIsAdmin(verified);
+    setLoading(false);
+  }, []);
+
+  return { isAdmin, loading };
 }
 
 export function useDoc(path: string | null) {
