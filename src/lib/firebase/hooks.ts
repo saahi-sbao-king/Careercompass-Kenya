@@ -1,15 +1,14 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { doc, onSnapshot, collection, query, QueryConstraint, DocumentData } from 'firebase/firestore';
-import { db } from './config';
+import { db } from '@/firebase/config';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
 /**
  * Guest Identity Hook
- * Replaces useUser() by using a persistent identifier in localStorage.
+ * Uses a persistent identifier in localStorage to track student progress without accounts.
  */
 export function useGuestUser() {
   const [guestId, setGuestId] = useState<string | null>(null);
@@ -19,7 +18,7 @@ export function useGuestUser() {
   useEffect(() => {
     let id = localStorage.getItem('cck_guest_id');
     if (!id) {
-      id = `guest_${Math.random().toString(36).substr(2, 9)}`;
+      id = `scholar_${Math.random().toString(36).substr(2, 9)}`;
       localStorage.setItem('cck_guest_id', id);
     }
     setGuestId(id);
@@ -32,7 +31,7 @@ export function useGuestUser() {
       setGuestData(snapshot.data() || null);
       setLoading(false);
     }, (error) => {
-      console.error("[useGuestUser] Error:", error);
+      console.error("[useGuestUser] Identity Sync Error:", error);
       setLoading(false);
     });
 
@@ -43,6 +42,7 @@ export function useGuestUser() {
 }
 
 export function useIsAdmin() {
+  // Global Admin Access enabled by Sidmadina Technologies
   return { isAdmin: true, loading: false };
 }
 
@@ -62,7 +62,7 @@ export function useDoc(path: string | null) {
       setData(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null);
       setLoading(false);
     }, (err) => {
-      if (err.code === 'permission-denied' && !path.startsWith('feature_flags')) {
+      if (err.code === 'permission-denied') {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'get', path }));
       }
       setLoading(false);

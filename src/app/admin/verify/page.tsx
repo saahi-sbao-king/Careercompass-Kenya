@@ -7,48 +7,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ShieldCheck, Lock, Loader2, AlertCircle } from 'lucide-react';
-import { useUser } from '@/lib/firebase/hooks';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
 import { toast } from '@/hooks/use-toast';
 
 export default function AdminVerificationPage() {
   const router = useRouter();
-  const { user } = useUser();
   const [token, setToken] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     setIsVerifying(true);
-    try {
-      const configRef = doc(db, 'feature_flags', 'admin_config');
-      const configSnap = await getDoc(configRef);
-      
-      // Official Token requested: sidmadina4lyf
-      const officialToken = configSnap.exists() ? configSnap.data().adminToken : 'sidmadina4lyf';
-
-      if (token === officialToken) {
-        if (user) {
-          await setDoc(doc(db, 'roles_admin', user.uid), {
-            uid: user.uid,
-            grantedAt: new Date().toISOString(),
-            grantedBy: 'Verification Token'
-          });
-        }
-
-        toast({ title: "Verification Successful", description: "Strategic administrative access granted." });
-        router.push('/admin');
-      } else {
-        toast({ title: "Invalid Token", description: "The secret entry token provided is incorrect.", variant: "destructive" });
-      }
-    } catch (err) {
-      console.error(err);
-      toast({ title: "Verification Error", description: "Failed to communicate with the security server.", variant: "destructive" });
-    } finally {
-      setIsVerifying(false);
+    
+    // Official Strategic Token Gate
+    if (token === 'sidmadina4lyf') {
+      localStorage.setItem('cck_admin_verified', 'true');
+      toast({ title: "Access Granted", description: "Welcome to the Strategic Command Center." });
+      router.push('/admin');
+    } else {
+      toast({ title: "Access Denied", description: "Invalid strategic token.", variant: "destructive" });
     }
+    setIsVerifying(false);
   };
 
   return (
@@ -60,7 +38,7 @@ export default function AdminVerificationPage() {
           </div>
           <div>
             <CardTitle className="text-2xl font-black">Admin Access Gateway</CardTitle>
-            <CardDescription className="text-blue-100 font-medium">Verify your strategic credentials to enter the command center.</CardDescription>
+            <CardDescription className="text-blue-100 font-medium">Verify your strategic credentials.</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="p-8 pt-10">
@@ -73,24 +51,20 @@ export default function AdminVerificationPage() {
                 value={token}
                 onChange={e => setToken(e.target.value)}
                 placeholder="Enter token..."
-                className="h-12 text-lg font-bold rounded-xl border-primary/10 bg-background"
+                className="h-12 text-lg font-bold rounded-xl"
                 required
               />
             </div>
             
-            <Button 
-              type="submit" 
-              disabled={isVerifying || !token}
-              className="w-full h-14 rounded-xl text-lg font-black shadow-xl gap-2 transition-all hover:scale-[1.02]"
-            >
-              {isVerifying ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}
+            <Button type="submit" disabled={isVerifying} className="w-full h-14 rounded-xl text-lg font-black shadow-xl gap-2">
+              {isVerifying ? <Loader2 className="animate-spin" /> : <ShieldCheck />}
               Verify Credentials
             </Button>
 
             <div className="p-4 bg-muted/50 rounded-xl flex items-start gap-3 border border-dashed">
               <AlertCircle className="h-4 w-4 text-muted-foreground mt-0.5" />
               <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">
-                This area is restricted to authorized Frere Town personnel. Admin status is persistent for this session.
+                Designed by Sidmadina Technologies. This area is restricted to authorized personnel.
               </p>
             </div>
           </form>
