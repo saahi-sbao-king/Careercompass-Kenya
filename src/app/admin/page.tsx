@@ -1,28 +1,20 @@
 "use client";
 
-import { useCollection, useDoc } from '@/lib/firebase/hooks';
+import { useCollection } from '@/lib/firebase/hooks';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Users, TrendingUp, ShieldCheck, Star, CreditCard, Loader2, KeyRound, ReceiptText, UserCheck, Search, ShieldAlert, PieChart as PieIcon } from 'lucide-react';
-import { useMemo, useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { Users, ShieldCheck, Search, Loader2, PieChart as PieIcon } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
-import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function AdminDashboard() {
   const { data: users, loading: usersLoading } = useCollection('users');
-  
   const [searchTerm, setSearchTerm] = useState('');
-  const [grantingId, setGrantingId] = useState<string | null>(null);
 
   const stats = useMemo(() => {
-    if (!users) return { totalUsers: 0, completedAssessments: 0, pathways: {}, chartData: [] };
+    if (!users) return { totalUsers: 0, completedAssessments: 0, chartData: [] };
     const completed = users.filter(u => u.assessment).length;
     
     const intelligenceDistribution = users.reduce((acc: any, u) => {
@@ -44,44 +36,58 @@ export default function AdminDashboard() {
   const filteredUsers = useMemo(() => {
     if (!users) return [];
     return users.filter(u => {
-      const name = u.assessment?.userInfo?.name || u.id;
+      const name = u.assessment?.userInfo?.name || u.username || u.id;
       return name.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [users, searchTerm]);
 
-  if (usersLoading) return <div className="p-24 text-center"><Loader2 className="animate-spin mx-auto" /></div>;
+  if (usersLoading) return <div className="p-24 text-center"><Loader2 className="animate-spin mx-auto text-primary" /></div>;
 
   return (
     <div className="container mx-auto py-12 px-4 space-y-12">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-primary text-white rounded-2xl"><ShieldCheck className="h-8 w-8" /></div>
+          <div className="p-3 bg-primary text-white rounded-2xl shadow-xl">
+            <ShieldCheck className="h-8 w-8" />
+          </div>
           <div>
             <h1 className="text-3xl font-black">Strategic Console</h1>
-            <p className="text-muted-foreground text-sm">Managing the future of Frere Town Secondary.</p>
+            <p className="text-muted-foreground text-sm font-medium">Designed by Sidmadina Technologies.</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-primary/5 border-none">
-          <CardHeader><CardTitle className="text-[10px] font-black uppercase tracking-widest text-primary">Total Students</CardTitle></CardHeader>
-          <CardContent><div className="text-4xl font-black">{stats.totalUsers}</div></CardContent>
+        <Card className="bg-primary/5 border-none shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-primary">Total Students</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-black">{stats.totalUsers}</div>
+          </CardContent>
         </Card>
-        <Card className="bg-secondary/5 border-none">
-          <CardHeader><CardTitle className="text-[10px] font-black uppercase tracking-widest text-secondary">Evaluations</CardTitle></CardHeader>
-          <CardContent><div className="text-4xl font-black">{stats.completedAssessments}</div></CardContent>
+        <Card className="bg-secondary/5 border-none shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-secondary">Evaluations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-black">{stats.completedAssessments}</div>
+          </CardContent>
         </Card>
-        <Card className="bg-muted/50 border-none">
-          <CardHeader><CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Completion Rate</CardTitle></CardHeader>
-          <CardContent><div className="text-4xl font-black">{Math.round((stats.completedAssessments / (stats.totalUsers || 1)) * 100)}%</div></CardContent>
+        <Card className="bg-muted/50 border-none shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Completion Rate</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-black">{Math.round((stats.completedAssessments / (stats.totalUsers || 1)) * 100)}%</div>
+          </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-xl mb-12 bg-muted/50 p-1.5 rounded-2xl border">
-          <TabsTrigger value="users" className="rounded-xl font-black gap-2"><Users className="h-4 w-4" /> User Management</TabsTrigger>
-          <TabsTrigger value="analytics" className="rounded-xl font-black gap-2"><PieIcon className="h-4 w-4" /> Intelligence Insights</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 max-w-xl mb-12 bg-muted/50 p-1.5 rounded-2xl border h-14">
+          <TabsTrigger value="users" className="rounded-xl font-black gap-2"><Users className="h-4 w-4" /> User Registry</TabsTrigger>
+          <TabsTrigger value="analytics" className="rounded-xl font-black gap-2"><PieIcon className="h-4 w-4" /> Intel Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-8">
@@ -103,27 +109,27 @@ export default function AdminDashboard() {
                     <tr>
                       <th className="px-8 py-6">Student Profile</th>
                       <th className="px-8 py-6">Assessed Pathway</th>
-                      <th className="px-8 py-6 text-right">Completion Date</th>
+                      <th className="px-8 py-6 text-right">Last Active</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {filteredUsers.map(u => (
                       <tr key={u.id} className="hover:bg-muted/30 transition-colors">
                         <td className="px-8 py-6">
-                          <p className="font-black text-lg">{u.assessment?.userInfo?.name || 'Anonymous Guest'}</p>
-                          <p className="text-xs text-muted-foreground font-mono">{u.id}</p>
+                          <p className="font-black text-lg">{u.assessment?.userInfo?.name || u.username || 'Anonymous Scholar'}</p>
+                          <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-tighter">{u.id}</p>
                         </td>
                         <td className="px-8 py-6">
                           {u.assessment ? (
-                            <Badge className="bg-primary/10 text-primary border-primary/20 font-black">
+                            <Badge className="bg-primary/10 text-primary border-primary/20 font-black px-3 py-1 rounded-lg">
                               {u.assessment.pathway}
                             </Badge>
                           ) : (
-                            <span className="text-muted-foreground italic text-xs">Pending Evaluation</span>
+                            <span className="text-muted-foreground italic text-xs">Pending Analysis</span>
                           )}
                         </td>
                         <td className="px-8 py-6 text-right text-xs font-bold text-muted-foreground">
-                          {u.assessment?.completedAt ? new Date(u.assessment.completedAt).toLocaleDateString() : 'N/A'}
+                          {u.lastActive ? new Date(u.lastActive).toLocaleDateString() : (u.assessment?.completedAt ? new Date(u.assessment.completedAt).toLocaleDateString() : 'N/A')}
                         </td>
                       </tr>
                     ))}
@@ -138,7 +144,7 @@ export default function AdminDashboard() {
           <Card className="border-none shadow-2xl rounded-[3rem] p-10 bg-card">
             <CardHeader className="px-0 pt-0 pb-10">
               <CardTitle className="text-3xl font-black">Intelligence Distribution</CardTitle>
-              <CardDescription>Number of students scoring highly (>60%) in each modality.</CardDescription>
+              <CardDescription className="font-medium">Number of students scoring highly (>60%) in each modality.</CardDescription>
             </CardHeader>
             <CardContent className="h-[500px] p-0">
               <ResponsiveContainer width="100%" height="100%">
@@ -155,7 +161,7 @@ export default function AdminDashboard() {
                   />
                   <Tooltip 
                     cursor={{ fill: 'hsl(var(--primary)/0.05)' }}
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontWeight: 'bold' }}
                   />
                   <Bar dataKey="value" radius={[0, 12, 12, 0]} fill="hsl(var(--primary))" barSize={32}>
                     {stats.chartData.map((entry, index) => (

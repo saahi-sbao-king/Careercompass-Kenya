@@ -11,11 +11,12 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useGuestUser } from '@/lib/firebase/hooks';
 import { doc, setDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db } from '@/firebase/config';
 import { toast } from '@/hooks/use-toast';
 import { 
-  ChevronLeft, ChevronRight, Loader2, UserCircle, 
-  Sparkles, ShieldCheck, ArrowRight
+  UserCircle, 
+  Loader2,
+  Brain
 } from 'lucide-react';
 
 export default function AssessmentPage() {
@@ -51,7 +52,7 @@ export default function AssessmentPage() {
 
   const handleUserInfoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setStep(2); // Proceed directly to questionnaire
+    setStep(1); // Proceed directly to questionnaire
   };
 
   const handleAnswerChange = (value: string) => {
@@ -70,7 +71,10 @@ export default function AssessmentPage() {
     });
 
     const finalScores: Record<string, number> = {};
-    Object.keys(intelligenceScores).forEach(type => { finalScores[type] = (intelligenceScores[type] / 25) * 100; });
+    Object.keys(intelligenceScores).forEach(type => { 
+      // Normalize to 0-100 scale (each category has 5 questions, max score 25)
+      finalScores[type] = (intelligenceScores[type] / 25) * 100; 
+    });
 
     const resultData = {
       pathway: calculatePathway(finalScores),
@@ -80,12 +84,21 @@ export default function AssessmentPage() {
     };
 
     try {
-      await setDoc(doc(db, 'users', guestId), { assessment: resultData, id: guestId, username: userInfo.name }, { merge: true });
+      await setDoc(doc(db, 'users', guestId), { 
+        assessment: resultData, 
+        id: guestId, 
+        username: userInfo.name,
+        lastActive: new Date().toISOString()
+      }, { merge: true });
+      
       localStorage.removeItem('mi-assessment-progress');
-      toast({ title: "Complete!", description: "Synchronizing roadmap..." });
+      toast({ title: "Analysis Complete", description: "Your professional blueprint is ready." });
       router.push('/dashboard');
-    } catch (err) { toast({ title: "Save Error", variant: "destructive" }); }
-    finally { setIsSaving(false); }
+    } catch (err) { 
+      toast({ title: "Save Error", variant: "destructive" }); 
+    } finally { 
+      setIsSaving(false); 
+    }
   };
 
   if (!isHydrated) return <div className="p-24 text-center"><Loader2 className="animate-spin h-12 w-12 text-primary mx-auto" /></div>;
@@ -97,17 +110,34 @@ export default function AssessmentPage() {
           <CardHeader className="text-center bg-primary/5 pb-8 border-b">
             <UserCircle className="h-12 w-12 text-primary mx-auto mb-4" />
             <CardTitle className="text-2xl font-black">Information Hub</CardTitle>
-            <CardDescription>Enter your details to start the free assessment.</CardDescription>
+            <CardDescription>Enter your details to start the assessment. No payment required.</CardDescription>
           </CardHeader>
           <CardContent className="pt-8">
             <form onSubmit={handleUserInfoSubmit} className="space-y-6">
-              <div className="space-y-2"><Label>Full Name</Label><Input required value={userInfo.name} onChange={e => setUserInfo(prev => ({ ...prev, name: e.target.value }))} className="h-14 rounded-2xl" /></div>
-              <div className="space-y-2"><Label>Phone Number</Label><Input required value={userInfo.phone} onChange={e => setUserInfo(prev => ({ ...prev, phone: e.target.value }))} className="h-14 rounded-2xl" /></div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2"><Label>Age</Label><Input required type="number" value={userInfo.age} onChange={e => setUserInfo(prev => ({ ...prev, age: e.target.value }))} className="h-14 rounded-2xl" /></div>
-                <div className="space-y-2"><Label>Grade</Label><Input required value={userInfo.grade} onChange={e => setUserInfo(prev => ({ ...prev, grade: e.target.value }))} className="h-14 rounded-2xl" /></div>
+              <div className="space-y-2">
+                <Label>Full Name</Label>
+                <Input required value={userInfo.name} onChange={e => setUserInfo(prev => ({ ...prev, name: e.target.value }))} className="h-14 rounded-2xl" placeholder="e.g. Sadiq Sbao" />
               </div>
-              <Button type="submit" className="w-full h-16 text-xl font-black rounded-[1.5rem]">Start Quiz</Button>
+              <div className="space-y-2">
+                <Label>Phone Number</Label>
+                <Input required value={userInfo.phone} onChange={e => setUserInfo(prev => ({ ...prev, phone: e.target.value }))} className="h-14 rounded-2xl" placeholder="+254..." />
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Age</Label>
+                  <Input required type="number" value={userInfo.age} onChange={e => setUserInfo(prev => ({ ...prev, age: e.target.value }))} className="h-14 rounded-2xl" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Grade / Level</Label>
+                  <Input required value={userInfo.grade} onChange={e => setUserInfo(prev => ({ ...prev, grade: e.target.value }))} className="h-14 rounded-2xl" placeholder="Grade 10" />
+                </div>
+              </div>
+              <Button type="submit" className="w-full h-16 text-xl font-black rounded-[1.5rem] shadow-xl">
+                Start Questionnaire
+              </Button>
+              <p className="text-[10px] text-center text-muted-foreground uppercase font-bold tracking-widest">
+                Designed by Sidmadina Technologies
+              </p>
             </form>
           </CardContent>
         </Card>
@@ -120,30 +150,72 @@ export default function AssessmentPage() {
 
   return (
     <div className="container max-w-2xl mx-auto py-12 px-4">
+      <div className="flex items-center justify-between mb-4 px-2">
+        <div className="flex items-center gap-2">
+          <Brain className="h-5 w-5 text-primary" />
+          <span className="text-xs font-black uppercase tracking-widest text-primary">Intelligence Analysis</span>
+        </div>
+        <span className="text-xs font-bold text-muted-foreground">{currentQuestionIdx + 1} / {MI_QUESTIONS.length}</span>
+      </div>
       <Progress value={progressPercent} className="h-2 mb-10" />
-      <Card className="min-h-[500px] flex flex-col justify-between rounded-[3rem] overflow-hidden">
-        <CardHeader className="bg-primary text-white pb-12 px-10">
-          <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest">{currentQuestion.type}</span>
-          <CardTitle className="text-2xl md:text-3xl font-black">{currentQuestion.text}</CardTitle>
+      
+      <Card className="min-h-[550px] flex flex-col justify-between rounded-[3rem] overflow-hidden shadow-2xl border-primary/10">
+        <CardHeader className="bg-primary text-white pb-12 px-10 pt-10">
+          <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest w-fit mb-4 block">
+            {currentQuestion.type}
+          </span>
+          <CardTitle className="text-2xl md:text-3xl font-black leading-tight">
+            {currentQuestion.text}
+          </CardTitle>
         </CardHeader>
+        
         <CardContent className="py-12 px-10">
           <RadioGroup value={answers[currentQuestion.id]?.toString()} onValueChange={handleAnswerChange} className="grid gap-4">
             {[1, 2, 3, 4, 5].map(v => (
-              <div key={v} onClick={() => handleAnswerChange(v.toString())} className={`flex items-center space-x-4 p-5 border-2 rounded-2xl cursor-pointer ${answers[currentQuestion.id] === v ? 'border-primary bg-primary/5' : 'border-transparent'}`}>
+              <div 
+                key={v} 
+                onClick={() => handleAnswerChange(v.toString())} 
+                className={`flex items-center space-x-4 p-5 border-2 rounded-2xl cursor-pointer transition-all ${
+                  answers[currentQuestion.id] === v 
+                    ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' 
+                    : 'border-muted hover:border-primary/20 hover:bg-muted/50'
+                }`}
+              >
                 <RadioGroupItem value={v.toString()} id={`v-${v}`} />
-                <Label htmlFor={`v-${v}`} className="flex-1 font-black text-lg">{["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"][v-1]}</Label>
+                <Label htmlFor={`v-${v}`} className="flex-1 font-black text-lg cursor-pointer">
+                  {["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"][v-1]}
+                </Label>
               </div>
             ))}
           </RadioGroup>
         </CardContent>
-        <CardFooter className="flex justify-between border-t p-10">
-          <Button variant="ghost" onClick={() => setCurrentQuestionIdx(i => i - 1)} disabled={currentQuestionIdx === 0}>Previous</Button>
+        
+        <CardFooter className="flex justify-between border-t p-10 bg-muted/20">
+          <Button 
+            variant="ghost" 
+            onClick={() => setCurrentQuestionIdx(i => i - 1)} 
+            disabled={currentQuestionIdx === 0}
+            className="font-bold"
+          >
+            Previous
+          </Button>
+          
           {currentQuestionIdx === MI_QUESTIONS.length - 1 ? (
-            <Button onClick={calculateResults} disabled={!answers[currentQuestion.id] || isSaving} className="px-10 h-14 rounded-2xl font-black">
-              {isSaving ? <Loader2 className="animate-spin" /> : "Complete Analysis"}
+            <Button 
+              onClick={calculateResults} 
+              disabled={!answers[currentQuestion.id] || isSaving} 
+              className="px-10 h-14 rounded-2xl font-black shadow-xl"
+            >
+              {isSaving ? <Loader2 className="animate-spin" /> : "Finalize Blueprint"}
             </Button>
           ) : (
-            <Button onClick={() => setCurrentQuestionIdx(i => i + 1)} disabled={!answers[currentQuestion.id]} className="px-10 h-14 rounded-2xl font-black">Next Step</Button>
+            <Button 
+              onClick={() => setCurrentQuestionIdx(i => i + 1)} 
+              disabled={!answers[currentQuestion.id]} 
+              className="px-10 h-14 rounded-2xl font-black shadow-xl"
+            >
+              Next Question
+            </Button>
           )}
         </CardFooter>
       </Card>

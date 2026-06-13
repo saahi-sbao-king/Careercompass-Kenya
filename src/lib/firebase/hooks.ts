@@ -9,6 +9,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 /**
  * Guest Identity Hook
  * Uses a persistent identifier in localStorage to track student progress without accounts.
+ * This is the primary identity system for CareerCompass Kenya.
  */
 export function useGuestUser() {
   const [guestId, setGuestId] = useState<string | null>(null);
@@ -41,6 +42,10 @@ export function useGuestUser() {
   return { guestId, guestData, loading };
 }
 
+/**
+ * Admin Access Hook
+ * Stealth mode: check for a local verification flag.
+ */
 export function useIsAdmin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -54,6 +59,10 @@ export function useIsAdmin() {
   return { isAdmin, loading };
 }
 
+/**
+ * Generic Document Listener
+ * Handles permission errors gracefully using the specialized error handling architecture.
+ */
 export function useDoc(path: string | null) {
   const [data, setData] = useState<DocumentData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,9 +78,14 @@ export function useDoc(path: string | null) {
     const unsubscribe = onSnapshot(doc(db, path), (snapshot) => {
       setData(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null);
       setLoading(false);
-    }, (err) => {
-      if (err.code === 'permission-denied') {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'get', path }));
+    }, (error) => {
+      console.error(`[useDoc] Error at ${path}:`, error);
+      if (error.code === 'permission-denied') {
+        const contextualError = new FirestorePermissionError({
+          operation: 'get',
+          path: path
+        });
+        errorEmitter.emit('permission-error', contextualError);
       }
       setLoading(false);
     });
@@ -82,6 +96,10 @@ export function useDoc(path: string | null) {
   return { data, loading };
 }
 
+/**
+ * Generic Collection Listener
+ * Standardized query and listener implementation.
+ */
 export function useCollection(path: string | null, ...constraints: QueryConstraint[]) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,9 +117,14 @@ export function useCollection(path: string | null, ...constraints: QueryConstrai
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setData(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
-    }, (err) => {
-      if (err.code === 'permission-denied') {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'list', path: path || 'unknown' }));
+    }, (error) => {
+      console.error(`[useCollection] Error at ${path}:`, error);
+      if (error.code === 'permission-denied') {
+        const contextualError = new FirestorePermissionError({
+          operation: 'list',
+          path: path || 'unknown'
+        });
+        errorEmitter.emit('permission-error', contextualError);
       }
       setLoading(false);
     });
