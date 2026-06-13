@@ -10,19 +10,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from '@/hooks/use-toast';
 import { 
   Target, Calculator, BookOpen, Sparkles, Loader2, ListChecks, 
   Landmark, Microscope, Languages, Trophy, ShieldCheck, Zap,
-  Cpu, Rocket, FlaskConical, Plane, Briefcase, Gavel, Globe, Activity
+  Cpu, FlaskConical, Briefcase, Gavel, Globe, Activity, Palette, Music
 } from 'lucide-react';
 import { exploreSubjectCombinations } from '@/ai/flows/subject-combination-flow';
 
 const SUBJECT_DOMAINS = {
   "STEM Domain": ["Biology", "Chemistry", "Physics", "Computer Science", "Agriculture", "Geography", "Aviation", "Marine & Fisheries"],
   "Social & Humanities": ["History", "Literature in English", "Fasihi ya Kiswahili", "CRE/IRE", "Business Studies", "French", "German"],
-  "Arts and Sports": ["Sports and Recreation", "Music and Dance", "Theatre and Film", "Fine Arts"]
+  "Arts and Sports": ["Sports and Recreation", "Music and Dance", "Theatre and Film", "Fine Arts", "Graphic Design", "Media Arts"]
 };
 
 export default function SubjectExplorerFinal() {
@@ -31,7 +30,7 @@ export default function SubjectExplorerFinal() {
   const [analysis, setAnalysis] = useState<any>(null);
   const [cluster, setCluster] = useState({ math: '', s1: '', s2: '', s3: '' });
   const [weight, setWeight] = useState<number | null>(null);
-  const [catalogueView, setCatalogueView] = useState<'stem' | 'social'>('stem');
+  const [catalogueView, setCatalogueView] = useState<'stem' | 'social' | 'arts'>('stem');
 
   const toggle = (s: string) => {
     setSelected(prev => prev.includes(s) ? prev.filter(x => x !== s) : prev.length < 3 ? [...prev, s] : prev);
@@ -185,26 +184,33 @@ export default function SubjectExplorerFinal() {
 
             <TabsContent value="catalogue" className="space-y-12">
               <div className="flex justify-center mb-8">
-                <div className="bg-muted p-1 rounded-xl flex gap-1">
+                <div className="bg-muted p-1 rounded-xl flex gap-1 overflow-x-auto">
                   <Button 
                     variant={catalogueView === 'stem' ? 'default' : 'ghost'} 
                     onClick={() => setCatalogueView('stem')}
-                    className="rounded-lg font-black"
+                    className="rounded-lg font-black text-xs md:text-sm"
                   >
-                    STEM Framework
+                    STEM
                   </Button>
                   <Button 
                     variant={catalogueView === 'social' ? 'default' : 'ghost'} 
                     onClick={() => setCatalogueView('social')}
-                    className="rounded-lg font-black"
+                    className="rounded-lg font-black text-xs md:text-sm"
                   >
                     Social Sciences
+                  </Button>
+                  <Button 
+                    variant={catalogueView === 'arts' ? 'default' : 'ghost'} 
+                    onClick={() => setCatalogueView('arts')}
+                    className="rounded-lg font-black text-xs md:text-sm"
+                  >
+                    Arts & Sports
                   </Button>
                 </div>
               </div>
 
-              {catalogueView === 'stem' ? (
-                <div className="space-y-12">
+              {catalogueView === 'stem' && (
+                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="p-10 bg-blue-950 text-white rounded-[3rem] shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-12 opacity-5"><FlaskConical className="h-64 w-64" /></div>
                     <div className="relative z-10 space-y-6">
@@ -213,11 +219,10 @@ export default function SubjectExplorerFinal() {
                         <h2 className="text-4xl font-black">STEM Framework</h2>
                       </div>
                       <p className="text-lg opacity-80 max-w-3xl leading-relaxed">
-                        The Science, Technology, Engineering and Mathematics (STEM) Framework is a premier senior school pathway in Kenya's CBE system, designed for scientific innovation and technical leadership.
+                        The Science, Technology, Engineering and Mathematics (STEM) Framework is designed for scientific innovation and technical leadership.
                       </p>
                     </div>
                   </div>
-
                   <div className="grid md:grid-cols-2 gap-10">
                     <Card className="rounded-[3rem] border-none shadow-xl overflow-hidden flex flex-col group">
                       <div className="h-2 w-full bg-blue-500" />
@@ -232,20 +237,8 @@ export default function SubjectExplorerFinal() {
                             {["Advanced Mathematics", "Biology", "Chemistry", "Physics"].map(s => <Badge key={s} variant="outline" className="rounded-lg">{s}</Badge>)}
                           </div>
                         </div>
-                        <div className="space-y-4">
-                          <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Core Careers</h4>
-                          <ul className="grid grid-cols-2 gap-2 text-sm font-bold text-slate-700">
-                            <li>• Medicine & Surgery</li>
-                            <li>• Pharmacy</li>
-                            <li>• Biomedical Science</li>
-                            <li>• Biotechnology</li>
-                            <li>• Genetics</li>
-                            <li>• Environmental Science</li>
-                          </ul>
-                        </div>
                       </CardContent>
                     </Card>
-
                     <Card className="rounded-[3rem] border-none shadow-xl overflow-hidden flex flex-col group">
                       <div className="h-2 w-full bg-emerald-500" />
                       <CardHeader className="bg-muted/30 p-10">
@@ -259,22 +252,13 @@ export default function SubjectExplorerFinal() {
                             {["Advanced Mathematics", "Physics", "Chemistry", "Computer Science", "Engineering Studies", "Aviation Studies"].map(s => <Badge key={s} variant="outline" className="rounded-lg">{s}</Badge>)}
                           </div>
                         </div>
-                        <div className="space-y-4">
-                          <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Core Careers</h4>
-                          <ul className="grid grid-cols-2 gap-2 text-sm font-bold text-slate-700">
-                            <li>• Software Engineering</li>
-                            <li>• Artificial Intelligence</li>
-                            <li>• Civil Engineering</li>
-                            <li>• Robotics</li>
-                            <li>• Architecture</li>
-                            <li>• Renewable Energy</li>
-                          </ul>
-                        </div>
                       </CardContent>
                     </Card>
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {catalogueView === 'social' && (
                 <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="p-10 bg-indigo-950 text-white rounded-[3rem] shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-12 opacity-5"><Gavel className="h-64 w-64" /></div>
@@ -284,13 +268,11 @@ export default function SubjectExplorerFinal() {
                         <h2 className="text-4xl font-black">Social Sciences Framework</h2>
                       </div>
                       <p className="text-lg opacity-80 max-w-3xl leading-relaxed">
-                        Designed for learners interested in humanities, law, governance, business, and communication. This pathway develops critical leaders for society and the economy.
+                        Designed for learners interested in humanities, law, governance, business, and communication.
                       </p>
                     </div>
                   </div>
-
                   <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Track 1: Humanities */}
                     <Card className="rounded-[3rem] border-none shadow-xl overflow-hidden flex flex-col group">
                       <div className="h-2 w-full bg-indigo-500" />
                       <CardHeader className="bg-muted/30 p-8">
@@ -304,19 +286,8 @@ export default function SubjectExplorerFinal() {
                             {["History", "Geography", "Business", "Economics", "CRE/IRE"].map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Careers</h4>
-                          <ul className="text-xs font-bold text-slate-700 space-y-1">
-                            <li>• Law & Advocacy</li>
-                            <li>• Public Administration</li>
-                            <li>• Banking & Accounting</li>
-                            <li>• Political Science</li>
-                          </ul>
-                        </div>
                       </CardContent>
                     </Card>
-
-                    {/* Track 2: Languages */}
                     <Card className="rounded-[3rem] border-none shadow-xl overflow-hidden flex flex-col group">
                       <div className="h-2 w-full bg-amber-500" />
                       <CardHeader className="bg-muted/30 p-8">
@@ -330,19 +301,8 @@ export default function SubjectExplorerFinal() {
                             {["English Lit", "Fasihi", "French", "German", "Arabic"].map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Careers</h4>
-                          <ul className="text-xs font-bold text-slate-700 space-y-1">
-                            <li>• Diplomacy & UN</li>
-                            <li>• Journalism & Media</li>
-                            <li>• Translation</li>
-                            <li>• Publishing</li>
-                          </ul>
-                        </div>
                       </CardContent>
                     </Card>
-
-                    {/* Track 3: Sports Science */}
                     <Card className="rounded-[3rem] border-none shadow-xl overflow-hidden flex flex-col group">
                       <div className="h-2 w-full bg-rose-500" />
                       <CardHeader className="bg-muted/30 p-8">
@@ -356,44 +316,95 @@ export default function SubjectExplorerFinal() {
                             {["Sports & Rec", "Exercise Phys", "Sports Psych", "Mgmt"].map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
                           </div>
                         </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              )}
+
+              {catalogueView === 'arts' && (
+                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="p-10 bg-rose-950 text-white rounded-[3rem] shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-12 opacity-5"><Palette className="h-64 w-64" /></div>
+                    <div className="relative z-10 space-y-6">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-xl"><Trophy className="h-8 w-8 text-rose-300" /></div>
+                        <h2 className="text-4xl font-black">Arts & Sports Science</h2>
+                      </div>
+                      <p className="text-lg opacity-80 max-w-3xl leading-relaxed">
+                        Designed for learners with talents and interests in creative arts, performing arts, visual arts, and sports.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid lg:grid-cols-3 gap-8">
+                    <Card className="rounded-[3rem] border-none shadow-xl overflow-hidden flex flex-col group">
+                      <div className="h-2 w-full bg-rose-500" />
+                      <CardHeader className="bg-muted/30 p-8">
+                        <CardTitle className="text-xl font-black flex items-center gap-3"><Palette className="text-rose-500" /> Arts Track</CardTitle>
+                        <CardDescription className="text-xs font-bold">Visual Arts & Creative Design.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-8 space-y-6 flex-grow">
                         <div className="space-y-2">
-                          <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Careers</h4>
-                          <ul className="text-xs font-bold text-slate-700 space-y-1">
-                            <li>• Professional Athlete</li>
-                            <li>• Coaching & Fitness</li>
-                            <li>• Sports Management</li>
-                            <li>• Sports Medicine</li>
-                          </ul>
+                          <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Key Subjects</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {["Fine Arts", "Graphic Design", "Media Arts", "Creative Writing"].map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="rounded-[3rem] border-none shadow-xl overflow-hidden flex flex-col group">
+                      <div className="h-2 w-full bg-orange-500" />
+                      <CardHeader className="bg-muted/30 p-8">
+                        <CardTitle className="text-xl font-black flex items-center gap-3"><Activity className="text-orange-500" /> Sports Science</CardTitle>
+                        <CardDescription className="text-xs font-bold">Athletic Excellence & Physiology.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-8 space-y-6 flex-grow">
+                        <div className="space-y-2">
+                          <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Key Subjects</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {["Sports and Rec", "Exercise Phys", "Sports Psych", "Medicine"].map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="rounded-[3rem] border-none shadow-xl overflow-hidden flex flex-col group">
+                      <div className="h-2 w-full bg-amber-500" />
+                      <CardHeader className="bg-muted/30 p-8">
+                        <CardTitle className="text-xl font-black flex items-center gap-3"><Music className="text-amber-500" /> Performing Arts</CardTitle>
+                        <CardDescription className="text-xs font-bold">Stage, Film & Broadcasting.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-8 space-y-6 flex-grow">
+                        <div className="space-y-2">
+                          <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Key Subjects</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {["Music", "Dance", "Theatre and Film", "Performance"].map(s => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
                   </div>
-
-                  <Card className="rounded-[3rem] border-none shadow-2xl p-10 bg-indigo-900 text-white">
+                  <Card className="rounded-[3rem] border-none shadow-2xl p-10 bg-rose-900 text-white">
                     <div className="grid md:grid-cols-2 gap-10">
                       <div className="space-y-6">
-                        <h3 className="text-3xl font-black flex items-center gap-3"><Zap className="text-amber-400" /> Social Competencies</h3>
+                        <h3 className="text-3xl font-black flex items-center gap-3"><Zap className="text-rose-300" /> Creative Competencies</h3>
                         <div className="grid grid-cols-2 gap-4">
-                          {[
-                            "Ethical Decision-Making", "Cultural Awareness", "Public Speaking",
-                            "Strategic Leadership", "Research & Analysis", "Social Policy Design"
-                          ].map(c => (
+                          {["Design Thinking", "Artistic Expression", "Performance Mastery", "Digital Content Mastery", "Sports Leadership", "Innovation"].map(c => (
                             <div key={c} className="flex items-center gap-3 text-sm font-bold">
-                              <div className="h-1.5 w-1.5 rounded-full bg-amber-400" /> {c}
+                              <div className="h-1.5 w-1.5 rounded-full bg-rose-300" /> {c}
                             </div>
                           ))}
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="p-6 bg-white/10 rounded-2xl border border-white/20 text-center">
-                          <Globe className="h-8 w-8 mx-auto mb-2 text-indigo-200" />
+                          <Globe className="h-8 w-8 mx-auto mb-2 text-rose-200" />
                           <p className="text-[10px] font-black uppercase">Emerging Field</p>
-                          <p className="font-bold text-xs mt-1">Policy Analyst</p>
+                          <p className="font-bold text-xs mt-1">Creative Director</p>
                         </div>
                         <div className="p-6 bg-white/10 rounded-2xl border border-white/20 text-center">
-                          <Target className="h-8 w-8 mx-auto mb-2 text-indigo-200" />
+                          <Target className="h-8 w-8 mx-auto mb-2 text-rose-200" />
                           <p className="text-[10px] font-black uppercase">Emerging Field</p>
-                          <p className="font-bold text-xs mt-1">Digital Strategist</p>
+                          <p className="font-bold text-xs mt-1">Sports Scientist</p>
                         </div>
                       </div>
                     </div>
