@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   const filteredUsers = useMemo(() => {
     if (!users) return [];
     return users.filter(u => {
-      const name = u.assessment?.userInfo?.name || u.username || u.id;
+      const name = u.assessment?.userInfo?.name || u.name || u.username || u.id;
       return name.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [users, searchTerm]);
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
                     {filteredUsers.map(u => (
                       <tr key={u.id} className="hover:bg-muted/30 transition-colors">
                         <td className="px-8 py-6">
-                          <p className="font-black text-lg">{u.assessment?.userInfo?.name || u.username || 'Anonymous Scholar'}</p>
+                          <p className="font-black text-lg">{u.assessment?.userInfo?.name || u.name || u.username || 'Anonymous Scholar'}</p>
                           <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-tighter">{u.id}</p>
                         </td>
                         <td className="px-8 py-6">
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
                           )}
                         </td>
                         <td className="px-8 py-6 text-right text-xs font-bold text-muted-foreground">
-                          {u.lastActive ? new Date(u.lastActive).toLocaleDateString() : (u.assessment?.completedAt ? new Date(u.assessment.completedAt).toLocaleDateString() : 'N/A')}
+                          {u.lastActive ? new Date(u.lastActive.seconds * 1000).toLocaleDateString() : 'N/A'}
                         </td>
                       </tr>
                     ))}

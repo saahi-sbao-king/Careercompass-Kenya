@@ -29,20 +29,27 @@ export function useGuestUser() {
   useEffect(() => {
     if (!guestId || !db) return;
 
-    const unsubscribe = onSnapshot(doc(db, 'users', guestId), (snapshot) => {
-      setGuestData(snapshot.data() || null);
-      setLoading(false);
-    }, (error) => {
-      console.warn("[useGuestUser] Identity Sync Warning:", error.message);
-      setLoading(false);
-    });
+    try {
+      const unsubscribe = onSnapshot(doc(db, 'users', guestId), (snapshot) => {
+        setGuestData(snapshot.data() || null);
+        setLoading(false);
+      }, (error) => {
+        console.warn("[useGuestUser] Identity Sync Warning:", error.message);
+        setLoading(false);
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    } catch (e) {
+      setLoading(false);
+    }
   }, [guestId]);
 
   return { guestId, guestData, loading };
 }
 
+/**
+ * Administrative Verification Hook
+ */
 export function useIsAdmin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -56,6 +63,9 @@ export function useIsAdmin() {
   return { isAdmin, loading };
 }
 
+/**
+ * Real-time Document Hook
+ */
 export function useDoc(path: string | null) {
   const [data, setData] = useState<DocumentData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,26 +78,33 @@ export function useDoc(path: string | null) {
     }
     
     setLoading(true);
-    const unsubscribe = onSnapshot(doc(db, path), (snapshot) => {
-      setData(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null);
-      setLoading(false);
-    }, (error) => {
-      console.error(`[useDoc] Error at ${path}:`, error);
-      if (error.code === 'permission-denied') {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          operation: 'get',
-          path: path
-        }));
-      }
-      setLoading(false);
-    });
+    try {
+      const unsubscribe = onSnapshot(doc(db, path), (snapshot) => {
+        setData(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null);
+        setLoading(false);
+      }, (error) => {
+        console.error(`[useDoc] Error at ${path}:`, error);
+        if (error.code === 'permission-denied') {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            operation: 'get',
+            path: path
+          }));
+        }
+        setLoading(false);
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    } catch (e) {
+      setLoading(false);
+    }
   }, [path]);
 
   return { data, loading };
 }
 
+/**
+ * Real-time Collection Hook
+ */
 export function useCollection(path: string | null, ...constraints: QueryConstraint[]) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,21 +119,42 @@ export function useCollection(path: string | null, ...constraints: QueryConstrai
     }
     
     setLoading(true);
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setData(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    }, (error) => {
-      if (error.code === 'permission-denied') {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          operation: 'list',
-          path: path || 'unknown'
-        }));
-      }
-      setLoading(false);
-    });
+    try {
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        setData(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+        setLoading(false);
+      }, (error) => {
+        if (error.code === 'permission-denied') {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            operation: 'list',
+            path: path || 'unknown'
+          }));
+        }
+        setLoading(false);
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    } catch (e) {
+      setLoading(false);
+    }
   }, [q, path]);
 
   return { data, loading };
+}
+
+/**
+ * Basic Auth User Hook
+ */
+export function useUser() {
+  const [user, setUser] = useState<any>(null);
+  const [userData, setUserData] = useState<DocumentData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // This hook is kept for components that might still reference it
+    // But most logic now uses the Auth.js session
+    setLoading(false);
+  }, []);
+
+  return { user, userData, loading };
 }

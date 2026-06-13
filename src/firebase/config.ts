@@ -1,4 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
@@ -13,16 +14,14 @@ export const firebaseConfig = {
   measurementId: "G-MDKRJHV58P"
 };
 
+// Singleton app initialization
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Safe App Check Initialization
+// Initialize App Check immediately if on the client
 if (typeof window !== 'undefined') {
   const siteKey = "6LcITm0sAAAAAHyJBIAJtqp4L6ixag3XrkaRMO_O";
   try {
-    // Only initialize once and catch failures to prevent "Failed to fetch" crashes
     if (!(window as any)._firebase_app_check_initialized) {
-      // In development or unstable network environments, App Check can fail to fetch its config.
-      // We wrap it to ensure it doesn't crash the main application thread.
       initializeAppCheck(app, {
         provider: new ReCaptchaEnterpriseProvider(siteKey),
         isTokenAutoRefreshEnabled: true
@@ -30,10 +29,12 @@ if (typeof window !== 'undefined') {
       (window as any)._firebase_app_check_initialized = true;
     }
   } catch (e) {
-    console.warn("Firebase App Check failed to initialize gracefully:", e);
+    // Silent catch for already initialized error or fetch failure
   }
 }
 
+// Services
+export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export { app };

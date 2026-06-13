@@ -45,6 +45,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       allowedOrigins: [
         '6000-firebase-studio-1770637161931.cluster-lu4mup47g5gm4rtyvhzpwbfadi.cloudworkstations.dev',
+        '3000-firebase-studio-1770637161931.cluster-lu4mup47g5gm4rtyvhzpwbfadi.cloudworkstations.dev',
         'localhost:9002',
         'localhost:3000',
         'career-navigator-00.web.app',

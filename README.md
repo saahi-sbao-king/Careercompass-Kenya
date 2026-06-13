@@ -3,6 +3,7 @@
 CareerCompass Kenya is a high-fidelity career guidance platform custom-built for students at Frere Town Secondary School and the wider Kenyan Competency-Based Education (CBE) system.
 
 ## 🚀 Core Features
+- **Secure Authentication**: Auth.js v5 integration with Google and Email/Password support.
 - **AI-Powered MI Assessment**: 45-question quiz based on Howard Gardner's theory.
 - **Pathfinder AI v3.0**: Strategic 3-elective mix analysis and cluster weight calculation.
 - **Hobby-Career Engine**: Predictive modeling for professional personas.
@@ -10,7 +11,8 @@ CareerCompass Kenya is a high-fidelity career guidance platform custom-built for
 
 ## 🛠 Technical Specification
 - **Framework**: Next.js 15, React 19.
-- **Backend**: Firebase (Firestore, Storage).
+- **Backend**: Firebase (Firestore, Storage, App Check).
+- **Auth**: Auth.js (NextAuth) with Firestore persistence.
 - **Design**: Tailwind CSS + ShadCN UI.
 - **Branding**: Designed by Sidmadina Technologies.
 

@@ -42,7 +42,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return {
             id: userDoc.id,
             email: user.email,
-            name: user.displayName || user.username || "Scholar",
+            name: user.name || user.displayName || user.username || "Scholar",
             role: user.role,
           };
         } catch (error) {
