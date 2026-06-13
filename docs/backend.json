@@ -1,49 +1,33 @@
+
 {
   "entities": {
     "User": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a user profile in the application.",
+      "description": "Represents a guest profile (formerly user profile).",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the user.",
-          "format": "uuid"
+          "description": "Unique identifier for the guest (stored in localStorage)."
         },
         "username": {
           "type": "string",
-          "description": "The username of the user."
-        },
-        "email": {
-          "type": "string",
-          "description": "The email address of the user.",
-          "format": "email"
+          "description": "The name of the student."
         },
         "role": {
           "type": "string",
-          "description": "The role of the user (Student, Teacher, Admin)."
-        },
-        "avatarUrl": {
-          "type": "string",
-          "description": "URL of the user's avatar image.",
-          "format": "uri"
+          "description": "The role of the user (defaults to Student)."
         },
         "hasPaidAssessment": {
           "type": "boolean",
-          "description": "Indicates if the user has paid for the premium assessment."
+          "description": "Indicates if the guest has paid for the premium assessment."
         },
-        "assessmentId": {
-          "type": "string",
-          "description": "Reference to Assessment. (Relationship: User 1:1 Assessment)"
+        "assessment": {
+          "type": "object",
+          "description": "The results of the career assessment."
         }
-      },
-      "required": [
-        "id",
-        "username",
-        "email",
-        "role"
-      ]
+      }
     },
     "Transaction": {
       "title": "Transaction",
@@ -51,7 +35,7 @@
       "description": "Stores PesaPal payment records.",
       "properties": {
         "id": { "type": "string" },
-        "userId": { "type": "string" },
+        "guestId": { "type": "string" },
         "orderTrackingId": { "type": "string" },
         "merchantReference": { "type": "string" },
         "amount": { "type": "number" },
@@ -59,85 +43,40 @@
         "createdAt": { "type": "string", format: "date-time" }
       }
     },
-    "Assessment": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Assessment",
-      "type": "object",
-      "description": "Stores the results of a user's career assessment.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the assessment."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:1 Assessment)"
-        },
-        "primaryPathway": {
-          "type": "string",
-          "description": "The recommended career pathway based on the assessment (STEM, Arts & Sports Science, Social Sciences)."
-        },
-        "confidenceScore": {
-          "type": "number",
-          "description": "A score indicating the confidence level of the pathway recommendation."
-        },
-        "scores": {
-          "type": "object",
-          "description": "MI individual scores"
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "primaryPathway",
-        "confidenceScore"
-      ]
-    },
     "FeatureFlag": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "FeatureFlag",
       "type": "object",
-      "description": "Represents a feature flag or system configuration.",
+      "description": "Represents a system configuration.",
       "properties": {
         "id": {
-          "type": "string",
-          "description": "Unique identifier for the flag (e.g., assessment_paywall, admin_config)."
+          "type": "string"
         },
         "isEnabled": {
-          "type": "boolean",
-          "description": "Indicates whether the feature is enabled."
+          "type": "boolean"
         },
         "priceKES": {
-          "type": "number",
-          "description": "The price of the feature in KES."
+          "type": "number"
         },
         "adminToken": {
-          "type": "string",
-          "description": "The secret token used to claim admin privileges."
+          "type": "string"
         }
-      },
-      "required": [
-        "id"
-      ]
+      }
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous",
-      "google.com"
-    ]
+    "providers": []
   },
   "firestore": {
     "structure": [
       {
-        "path": "/users/{userId}",
+        "path": "/users/{guestId}",
         "definition": {
           "entityName": "User",
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profile data."
+          "description": "Stores guest profile data."
         }
       },
       {
@@ -147,10 +86,10 @@
           "schema": {
             "$ref": "#/backend/entities/FeatureFlag"
           },
-          "description": "Stores system settings including admin tokens and paywalls."
+          "description": "Public configuration flags."
         }
       }
     ],
-    "reasoning": "Global administrative access enabled. All paths are publicly readable and writable to support the requested Admin Command Center without authentication requirements. This resolves permission errors for unauthenticated users checking system status."
+    "reasoning": "Authentication removed. All paths are publicly accessible to allow anonymous use of the career guidance tools while maintaining persistent data via localStorage Guest IDs."
   }
 }

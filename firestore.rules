@@ -1,20 +1,13 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     /**
-     * GLOBAL ADMINISTRATIVE ACCESS (Production Patch v1.0.2)
-     * This system is configured to allow public access to core configurations
-     * and administrative management without mandatory authentication.
+     * PUBLIC ACCESS CONFIGURATION (v2.0.0)
+     * Authentication has been removed. All data is publicly accessible.
+     * Persistence is handled via client-side Guest IDs.
      */
-    
-    // Explicitly allow public read access to system configuration/feature flags
-    match /feature_flags/{flagId} {
-      allow read: if true;
-      allow write: if true; // Admin management enabled
-    }
-
-    // Global match for all other collections
     match /{document=**} {
       allow read, write: if true;
     }

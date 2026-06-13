@@ -1,60 +1,47 @@
+
+'use client';
+
 import { useState, useEffect, useMemo } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, onSnapshot, collection, QueryConstraint, query, DocumentData } from 'firebase/firestore';
-import { auth, db } from './config';
+import { doc, onSnapshot, collection, query, QueryConstraint, DocumentData } from 'firebase/firestore';
+import { db } from './config';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
-export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
+/**
+ * Guest Identity Hook
+ * Replaces useUser() by using a persistent identifier in localStorage.
+ */
+export function useGuestUser() {
+  const [guestId, setGuestId] = useState<string | null>(null);
+  const [guestData, setGuestData] = useState<DocumentData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    return onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
+    let id = localStorage.getItem('cck_guest_id');
+    if (!id) {
+      id = `guest_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('cck_guest_id', id);
+    }
+    setGuestId(id);
   }, []);
 
-  return { user, loading };
-}
-
-export function useUser() {
-  const { user } = useAuth();
-  const [userData, setUserData] = useState<DocumentData | null>(null);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    if (!user) {
-      setUserData(null);
-      setLoading(false);
-      return;
-    }
+    if (!guestId) return;
 
-    const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (snapshot) => {
-      setUserData(snapshot.data() || null);
+    const unsubscribe = onSnapshot(doc(db, 'users', guestId), (snapshot) => {
+      setGuestData(snapshot.data() || null);
       setLoading(false);
     }, (error) => {
-      if (error.code === 'permission-denied') {
-        const contextualError = new FirestorePermissionError({
-          operation: 'get',
-          path: `users/${user.uid}`
-        });
-        errorEmitter.emit('permission-error', contextualError);
-      }
+      console.error("[useGuestUser] Error:", error);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [guestId]);
 
-  return { user, userData, loading };
+  return { guestId, guestData, loading };
 }
 
-/**
- * Administrative Access Hook
- * Forced to true for global administrative access as requested.
- */
 export function useIsAdmin() {
   return { isAdmin: true, loading: false };
 }
@@ -71,22 +58,12 @@ export function useDoc(path: string | null) {
     }
     
     setLoading(true);
-    
     const unsubscribe = onSnapshot(doc(db, path), (snapshot) => {
-      if (snapshot.exists()) {
-        setData({ id: snapshot.id, ...snapshot.data() });
-      } else {
-        setData(null);
-      }
+      setData(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null);
       setLoading(false);
-    }, (error) => {
-      // Do not trigger crash for feature_flags as they are expected to be public
-      if (error.code === 'permission-denied' && !path.startsWith('feature_flags/')) {
-        const contextualError = new FirestorePermissionError({
-          operation: 'get',
-          path: path
-        });
-        errorEmitter.emit('permission-error', contextualError);
+    }, (err) => {
+      if (err.code === 'permission-denied' && !path.startsWith('feature_flags')) {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'get', path }));
       }
       setLoading(false);
     });
@@ -101,10 +78,7 @@ export function useCollection(path: string | null, ...constraints: QueryConstrai
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const q = useMemo(() => {
-    if (!path) return null;
-    return query(collection(db, path), ...constraints);
-  }, [path]);
+  const q = useMemo(() => path ? query(collection(db, path), ...constraints) : null, [path, constraints]);
 
   useEffect(() => {
     if (!q) {
@@ -114,17 +88,12 @@ export function useCollection(path: string | null, ...constraints: QueryConstrai
     }
     
     setLoading(true);
-
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      setData(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+      setData(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
-    }, (error) => {
-      if (error.code === 'permission-denied') {
-        const contextualError = new FirestorePermissionError({
-          operation: 'list',
-          path: path || 'unknown'
-        });
-        errorEmitter.emit('permission-error', contextualError);
+    }, (err) => {
+      if (err.code === 'permission-denied') {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ operation: 'list', path: path || 'unknown' }));
       }
       setLoading(false);
     });
