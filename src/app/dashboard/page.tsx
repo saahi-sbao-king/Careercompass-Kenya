@@ -3,7 +3,12 @@ import { redirect } from "next/navigation";
 import { DashboardContent } from "@/components/DashboardContent";
 
 export default async function DashboardPage() {
-  const session = await auth();
+  let session = null;
+  try {
+    session = await auth();
+  } catch (e) {
+    console.error("Auth session fetch failed:", e);
+  }
 
   if (!session) {
     redirect("/login");

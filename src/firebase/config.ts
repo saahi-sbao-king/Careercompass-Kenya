@@ -21,6 +21,8 @@ if (typeof window !== 'undefined') {
   try {
     // Only initialize once and catch failures to prevent "Failed to fetch" crashes
     if (!(window as any)._firebase_app_check_initialized) {
+      // In development or unstable network environments, App Check can fail to fetch its config.
+      // We wrap it to ensure it doesn't crash the main application thread.
       initializeAppCheck(app, {
         provider: new ReCaptchaEnterpriseProvider(siteKey),
         isTokenAutoRefreshEnabled: true
@@ -28,7 +30,7 @@ if (typeof window !== 'undefined') {
       (window as any)._firebase_app_check_initialized = true;
     }
   } catch (e) {
-    console.warn("Firebase App Check failed to initialize. System will continue without it.");
+    console.warn("Firebase App Check failed to initialize gracefully:", e);
   }
 }
 

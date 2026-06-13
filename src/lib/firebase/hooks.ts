@@ -16,7 +16,8 @@ export function useGuestUser() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Client-side only ID generation
+    if (typeof window === 'undefined') return;
+    
     let id = localStorage.getItem('cck_guest_id');
     if (!id) {
       id = `scholar_${Math.random().toString(36).substr(2, 9)}`;
@@ -28,12 +29,11 @@ export function useGuestUser() {
   useEffect(() => {
     if (!guestId || !db) return;
 
-    // Stable listener with error boundary
     const unsubscribe = onSnapshot(doc(db, 'users', guestId), (snapshot) => {
       setGuestData(snapshot.data() || null);
       setLoading(false);
     }, (error) => {
-      console.warn("[useGuestUser] Identity Sync Warning (Non-Fatal):", error.message);
+      console.warn("[useGuestUser] Identity Sync Warning:", error.message);
       setLoading(false);
     });
 
@@ -72,6 +72,7 @@ export function useDoc(path: string | null) {
       setData(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null);
       setLoading(false);
     }, (error) => {
+      console.error(`[useDoc] Error at ${path}:`, error);
       if (error.code === 'permission-denied') {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
           operation: 'get',
