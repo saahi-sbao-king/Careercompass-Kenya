@@ -43,10 +43,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             id: userDoc.id,
             email: user.email,
             name: user.name || user.displayName || user.username || "Scholar",
-            role: user.role,
+            role: user.role || 'student',
           };
         } catch (error) {
-          console.error("Auth error:", error);
+          console.error("Auth authorize error:", error);
           return null;
         }
       }
@@ -61,15 +61,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-      if (isOnDashboard) {
+      const isOnAdmin = nextUrl.pathname.startsWith('/admin');
+      
+      if (isOnDashboard || isOnAdmin) {
         if (isLoggedIn) return true;
-        return false;
+        return false; // Redirect to login
       }
       return true;
     },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = (user as any).role;
+      }
+      return token;
+    },
     async session({ session, token }) {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        (session.user as any).role = token.role;
       }
       return session;
     },
