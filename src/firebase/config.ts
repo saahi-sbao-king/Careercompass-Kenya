@@ -1,5 +1,4 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
@@ -35,8 +34,7 @@ if (typeof window !== 'undefined') {
   }
 }
 
-// Services
-export const auth = getAuth(app);
+// Services (Firebase Auth is NOT used; using Auth.js instead)
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export { app };

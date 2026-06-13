@@ -1,8 +1,7 @@
-
 "use client";
 
-import { useUser } from '@/lib/firebase/hooks';
-import { auth, storage, db } from '@/lib/firebase/config';
+import { useSession } from 'next-auth/react';
+import { storage, db } from '@/lib/firebase/config';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,12 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { generateAvatar } from '@/ai/flows/generate-avatar';
 import { useState } from 'react';
-import { updateProfile } from 'firebase/auth';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
 import { toast } from '@/hooks/use-toast';
 import { Sparkles, Camera, Loader2, Check } from 'lucide-react';
 import Image from 'next/image';
+import { signOut } from 'next-auth/react';
+import { useDoc } from '@/lib/firebase/hooks';
 
 const DEFAULT_AVATARS = [
   { id: 'tech', label: 'Tech Engineer', url: 'https://picsum.photos/seed/engineer-2025/400/400' },
@@ -25,25 +25,28 @@ const DEFAULT_AVATARS = [
 ];
 
 export default function ProfilePage() {
-  const { user, userData } = useUser();
+  const { data: session, update: updateSession } = useSession();
+  const userId = session?.user?.id;
+  const { data: userData } = useDoc(userId ? `users/${userId}` : null);
+  
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUpdatingDefault, setIsUpdatingDefault] = useState<string | null>(null);
 
   const handleUpdateAvatar = async (url: string, id: string | null = null) => {
-    if (!user) return;
+    if (!userId) return;
     
     if (id) setIsUpdatingDefault(id);
     
     try {
-      // Update Auth Profile
-      await updateProfile(user, { photoURL: url });
-
       // Update Firestore
-      await setDoc(doc(db, 'users', user.uid), { 
+      await setDoc(doc(db, 'users', userId), { 
         photoURL: url,
         updatedAt: new Date().toISOString()
       }, { merge: true });
+
+      // Update Local Session
+      await updateSession({ user: { image: url } });
 
       toast({ title: "Profile updated!", description: "Your avatar has been successfully changed." });
     } catch (err: any) {
@@ -59,7 +62,7 @@ export default function ProfilePage() {
   };
 
   const handleGenerateAvatar = async () => {
-    if (!prompt.trim() || !user) {
+    if (!prompt.trim() || !userId) {
       toast({ title: "Please enter a prompt", variant: "destructive" });
       return;
     }
@@ -72,7 +75,7 @@ export default function ProfilePage() {
         throw new Error("No image data received.");
       }
 
-      const storageRef = ref(storage, `avatars/${user.uid}/profile_${Date.now()}.png`);
+      const storageRef = ref(storage, `avatars/${userId}/profile_${Date.now()}.png`);
       
       // Upload to Firebase Storage
       await uploadString(storageRef, result.avatarDataUri, 'data_url');
@@ -92,7 +95,7 @@ export default function ProfilePage() {
     }
   };
 
-  if (!user) return <div className="p-12 text-center">Please log in to view your profile.</div>;
+  if (!session) return <div className="p-12 text-center">Please log in to view your profile.</div>;
 
   return (
     <div className="container mx-auto py-12 px-4 max-w-5xl">
@@ -104,17 +107,17 @@ export default function ProfilePage() {
             <CardHeader className="text-center pb-8 bg-primary/5">
               <div className="relative mx-auto w-32 h-32 mb-4">
                 <Avatar className="w-full h-full border-4 border-background shadow-xl">
-                  <AvatarImage src={user.photoURL || undefined} className="object-cover" />
+                  <AvatarImage src={session.user?.image || undefined} className="object-cover" />
                   <AvatarFallback className="text-4xl bg-primary/5 text-primary">
-                    {user.email?.[0].toUpperCase()}
+                    {session.user?.email?.[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full border-4 border-background shadow-lg">
                   <Camera className="h-4 w-4" />
                 </div>
               </div>
-              <CardTitle>{userData?.assessment?.userInfo?.name || user.displayName || 'Student'}</CardTitle>
-              <CardDescription className="truncate">{user.email}</CardDescription>
+              <CardTitle>{userData?.name || session.user?.name || 'Student'}</CardTitle>
+              <CardDescription className="truncate">{session.user?.email}</CardDescription>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
               <div className="flex justify-between text-sm">
@@ -125,7 +128,7 @@ export default function ProfilePage() {
                 <span className="text-muted-foreground">Pathway</span>
                 <span className="font-semibold text-primary">{userData?.assessment?.pathway || 'Not assessed'}</span>
               </div>
-              <Button variant="outline" className="w-full mt-4" onClick={() => auth.signOut()}>Log out</Button>
+              <Button variant="outline" className="w-full mt-4" onClick={() => signOut({ callbackUrl: '/' })}>Log out</Button>
             </CardContent>
           </Card>
         </div>
@@ -210,4 +213,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
