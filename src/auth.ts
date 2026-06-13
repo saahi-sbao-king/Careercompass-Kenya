@@ -11,7 +11,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/login",
   },
-  // trustHost is critical for NextAuth v5 in proxy/workstation environments
   trustHost: true,
   secret: process.env.AUTH_SECRET,
   callbacks: {
@@ -20,7 +19,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       if (isOnDashboard) {
         if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
+        return false;
       }
       return true;
     },

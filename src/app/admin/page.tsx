@@ -14,7 +14,7 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const stats = useMemo(() => {
-    if (!users) return { totalUsers: 0, completedAssessments: 0, chartData: [] };
+    if (!users || users.length === 0) return { totalUsers: 0, completedAssessments: 0, chartData: [] };
     const completed = users.filter(u => u.assessment).length;
     
     const intelligenceDistribution = users.reduce((acc: any, u) => {
@@ -26,10 +26,15 @@ export default function AdminDashboard() {
       return acc;
     }, {});
 
+    const chartData = Object.entries(intelligenceDistribution).map(([name, value]) => ({ 
+      name, 
+      value: value as number 
+    }));
+
     return { 
       totalUsers: users.length, 
       completedAssessments: completed, 
-      chartData: Object.entries(intelligenceDistribution).map(([name, value]) => ({ name, value })) 
+      chartData 
     };
   }, [users]);
 
@@ -165,7 +170,7 @@ export default function AdminDashboard() {
                   />
                   <Bar dataKey="value" radius={[0, 12, 12, 0]} fill="hsl(var(--primary))" barSize={32}>
                     {stats.chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fillOpacity={0.8 + (index * 0.02)} />
+                      <Cell key={`cell-${entry.name}`} fillOpacity={0.8 + (index * 0.02)} />
                     ))}
                   </Bar>
                 </BarChart>
