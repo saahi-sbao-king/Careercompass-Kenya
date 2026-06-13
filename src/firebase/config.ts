@@ -5,31 +5,33 @@ import { getStorage } from 'firebase/storage';
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyBtualDtkc_r3ZF0MWqgiuWphG3S-Fs-GY",
-  authDomain: "career-navigator-00.firebaseapp.com",
-  projectId: "career-navigator-00",
-  storageBucket: "career-navigator-00.firebasestorage.app",
-  messagingSenderId: "351859269523",
-  appId: "1:351859269523:web:5087aefd35fdea25e05266",
-  measurementId: "G-MDKRJHV58P"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Singleton app initialization
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Initialize App Check immediately if on the client
+// Initialize App Check safely on the client
 if (typeof window !== 'undefined') {
-  const siteKey = "6LcITm0sAAAAAHyJBIAJtqp4L6ixag3XrkaRMO_O";
-  try {
-    if (!(window as any)._firebase_app_check_initialized) {
-      initializeAppCheck(app, {
-        provider: new ReCaptchaEnterpriseProvider(siteKey),
-        isTokenAutoRefreshEnabled: true
-      });
-      (window as any)._firebase_app_check_initialized = true;
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+  if (siteKey) {
+    try {
+      if (!(window as any)._firebase_app_check_initialized) {
+        initializeAppCheck(app, {
+          provider: new ReCaptchaEnterpriseProvider(siteKey),
+          isTokenAutoRefreshEnabled: true
+        });
+        (window as any)._firebase_app_check_initialized = true;
+      }
+    } catch (e) {
+      // Silent catch for initialization errors
     }
-  } catch (e) {
-    // Silent catch for already initialized error or fetch failure
   }
 }
 

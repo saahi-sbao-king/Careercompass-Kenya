@@ -2,18 +2,16 @@
 
 /**
  * @fileOverview PesaPal V3 API Integration for Kenyan Payments.
- * FORCED TO LIVE PRODUCTION ENVIRONMENT.
- * 
- * Credentials: 
- * Key: YDa82FrHOVqWntReTpS5peUiCvRYu8zM
- * Secret: x5RTmWwMhHB3JHQQzrF1gED0LeE=
+ * Strictly uses environment variables for security compliance.
  */
 
 const PESAPAL_URL = 'https://www.pesapal.com/pesapalv3';
-const CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY || 'YDa82FrHOVqWntReTpS5peUiCvRYu8zM'; 
-const CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET || 'x5RTmWwMhHB3JHQQzrF1gED0LeE=';
+const CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY; 
+const CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET;
 
 async function getAuthToken() {
+  if (!CONSUMER_KEY || !CONSUMER_SECRET) return null;
+
   try {
     const response = await fetch(`${PESAPAL_URL}/api/Auth/RequestToken`, {
       method: 'POST',
@@ -39,10 +37,9 @@ async function getAuthToken() {
 
 async function registerIPN(token: string) {
   try {
-    // Dynamically detect deployment URL for Vercel or Fallback
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}` 
-      : (process.env.NEXT_PUBLIC_BASE_URL || 'https://career-navigator-00.web.app');
+      : (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000');
     
     const ipnUrl = `${baseUrl}/api/pesapal/ipn`;
 
@@ -117,7 +114,7 @@ export async function initiatePayment(orderData: {
       return {
         success: true,
         redirectUrl: result.redirect_url,
-        orderTrackingId: result.order_tracking_id,
+        order_tracking_id: result.order_tracking_id,
         merchantReference
       };
     }
