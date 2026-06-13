@@ -4,37 +4,81 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a student profile with authentication and assessment data.",
+      "description": "Represents a student profile with strategic career and assessment data.",
       "properties": {
         "id": { "type": "string" },
+        "fullName": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "username": { "type": "string" },
-        "role": { "type": "string", "enum": ["student", "teacher"] },
+        "role": { "type": "string", "enum": ["student", "teacher", "admin"] },
+        "grade": { "type": "string" },
+        "school": { "type": "string" },
+        "county": { "type": "string" },
         "photoURL": { "type": "string" },
-        "hashedPassword": { "type": "string" },
-        "assessment": {
-          "type": "object",
-          "description": "Results of the Multiple Intelligence evaluation."
-        },
+        "selectedPathway": { "type": "string" },
+        "selectedSubjects": { "type": "array", "items": { "type": "string" } },
+        "interestScores": { "type": "object" },
+        "aptitudeScores": { "type": "object" },
+        "careerDNA": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "lastActive": { "type": "string", "format": "date-time" }
       }
     },
-    "StudyLog": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "StudyLog",
+    "Subject": {
       "type": "object",
       "properties": {
-        "subject": { "type": "string" },
-        "duration": { "type": "number" },
-        "date": { "type": "string" },
-        "guestId": { "type": "string" }
+        "name": { "type": "string" },
+        "domain": { "type": "string" },
+        "careerWeights": { "type": "object" },
+        "description": { "type": "string" }
+      }
+    },
+    "Career": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "cluster": { "type": "string" },
+        "description": { "type": "string" },
+        "salaryRange": { "type": "object" },
+        "futureDemand": { "type": "number" },
+        "requiredSubjects": { "type": "array" },
+        "recommendedCourses": { "type": "array" }
+      }
+    },
+    "University": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "county": { "type": "string" },
+        "type": { "type": "string" },
+        "website": { "type": "string" },
+        "courses": { "type": "array" }
+      }
+    },
+    "Course": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "duration": { "type": "string" },
+        "level": { "type": "string" },
+        "careerLinks": { "type": "array" },
+        "minimumSubjects": { "type": "array" }
+      }
+    },
+    "Scholarship": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "level": { "type": "string" },
+        "deadline": { "type": "string" },
+        "eligibility": { "type": "array" },
+        "website": { "type": "string" }
       }
     }
   },
   "auth": {
     "providers": ["google", "credentials"],
-    "reasoning": "Auth.js v5 providing Google and Email/Password access for students of Frere Town Secondary."
+    "reasoning": "Auth.js v5 providing role-based access for students and admins."
   },
   "firestore": {
     "structure": [
@@ -47,14 +91,34 @@
         }
       },
       {
-        "path": "/users/{userId}/studyLogs/{logId}",
-        "definition": {
-          "entityName": "StudyLog",
-          "schema": { "$ref": "#/backend/entities/StudyLog" },
-          "description": "Daily academic effort logs."
-        }
+        "path": "/subjects/{subjectId}",
+        "definition": { "entityName": "Subject", "description": "Official CBE electives." }
+      },
+      {
+        "path": "/careers/{careerId}",
+        "definition": { "entityName": "Career", "description": "Global and local career trajectories." }
+      },
+      {
+        "path": "/universities/{uniId}",
+        "definition": { "entityName": "University", "description": "Kenyan Higher Ed institutions." }
+      },
+      {
+        "path": "/courses/{courseId}",
+        "definition": { "entityName": "Course", "description": "Academic programs and requirements." }
+      },
+      {
+        "path": "/scholarships/{id}",
+        "definition": { "entityName": "Scholarship", "description": "Financial aid opportunities." }
+      },
+      {
+        "path": "/career_predictions/{userId}",
+        "definition": { "description": "AI-generated scores for users." }
+      },
+      {
+        "path": "/market_demand/{careerId}",
+        "definition": { "description": "Time-series job market data." }
       }
     ],
-    "reasoning": "Fully permissive rules applied to support public service model and legacy guest continuity."
+    "reasoning": "Role-based security model ensuring data privacy for students and global access for educational resources."
   }
 }
