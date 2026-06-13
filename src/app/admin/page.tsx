@@ -4,7 +4,7 @@ import { useCollection } from '@/lib/firebase/hooks';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Users, ShieldCheck, Search, Loader2, PieChart as PieIcon } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +12,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 export default function AdminDashboard() {
   const { data: users, loading: usersLoading } = useCollection('users');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const stats = useMemo(() => {
     if (!users || users.length === 0) return { totalUsers: 0, completedAssessments: 0, chartData: [] };
@@ -41,7 +46,7 @@ export default function AdminDashboard() {
   const filteredUsers = useMemo(() => {
     if (!users) return [];
     return users.filter(u => {
-      const name = u.assessment?.userInfo?.name || u.name || u.username || u.id;
+      const name = u.assessment?.userInfo?.name || u.name || u.displayName || u.username || u.email || 'Scholar';
       return name.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [users, searchTerm]);
@@ -114,15 +119,15 @@ export default function AdminDashboard() {
                     <tr>
                       <th className="px-8 py-6">Student Profile</th>
                       <th className="px-8 py-6">Assessed Pathway</th>
-                      <th className="px-8 py-6 text-right">Last Active</th>
+                      <th className="px-8 py-6 text-right">Registered</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {filteredUsers.map(u => (
                       <tr key={u.id} className="hover:bg-muted/30 transition-colors">
                         <td className="px-8 py-6">
-                          <p className="font-black text-lg">{u.assessment?.userInfo?.name || u.name || u.username || 'Anonymous Scholar'}</p>
-                          <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-tighter">{u.id}</p>
+                          <p className="font-black text-lg">{u.assessment?.userInfo?.name || u.name || u.displayName || u.username || 'Anonymous Scholar'}</p>
+                          <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-tighter">{u.email || u.id}</p>
                         </td>
                         <td className="px-8 py-6">
                           {u.assessment ? (
@@ -134,7 +139,7 @@ export default function AdminDashboard() {
                           )}
                         </td>
                         <td className="px-8 py-6 text-right text-xs font-bold text-muted-foreground">
-                          {u.lastActive ? new Date(u.lastActive.seconds * 1000).toLocaleDateString() : 'N/A'}
+                          {u.createdAt ? (typeof u.createdAt === 'string' ? new Date(u.createdAt).toLocaleDateString() : new Date(u.createdAt.seconds * 1000).toLocaleDateString()) : 'N/A'}
                         </td>
                       </tr>
                     ))}
@@ -152,29 +157,35 @@ export default function AdminDashboard() {
               <CardDescription className="font-medium">Number of students scoring highly (>60%) in each modality.</CardDescription>
             </CardHeader>
             <CardContent className="h-[500px] p-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.chartData} layout="vertical" margin={{ left: 40, right: 40 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                  <XAxis type="number" hide />
-                  <YAxis 
-                    dataKey="name" 
-                    type="category" 
-                    width={150} 
-                    tick={{ fontSize: 11, fontWeight: 'bold', fill: 'hsl(var(--primary))' }} 
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip 
-                    cursor={{ fill: 'hsl(var(--primary)/0.05)' }}
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontWeight: 'bold' }}
-                  />
-                  <Bar dataKey="value" radius={[0, 12, 12, 0]} fill="hsl(var(--primary))" barSize={32}>
-                    {stats.chartData.map((entry, index) => (
-                      <Cell key={`cell-${entry.name}`} fillOpacity={0.8 + (index * 0.02)} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {isMounted && stats.chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.chartData} layout="vertical" margin={{ left: 40, right: 40 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                    <XAxis type="number" hide />
+                    <YAxis 
+                      dataKey="name" 
+                      type="category" 
+                      width={150} 
+                      tick={{ fontSize: 11, fontWeight: 'bold', fill: 'hsl(var(--primary))' }} 
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip 
+                      cursor={{ fill: 'hsl(var(--primary)/0.05)' }}
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontWeight: 'bold' }}
+                    />
+                    <Bar dataKey="value" fill="hsl(var(--primary))" barSize={32}>
+                      {stats.chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fillOpacity={0.8 + (index * 0.05)} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground font-bold italic">
+                  {usersLoading ? "Loading strategic intelligence..." : "Insufficient data for analytics."}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

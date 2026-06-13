@@ -40,7 +40,7 @@ export default function AssessmentPage() {
         const info = data.userInfo || { name: '', age: '', school: '', grade: '', phone: '' };
         setUserInfo(info);
         
-        // If name exists, skip the info hub for immediate entry
+        // Immediate entry if info exists
         if (info.name && info.name.length > 2) {
           setStep(1);
         } else {
@@ -90,11 +90,10 @@ export default function AssessmentPage() {
       completedAt: new Date().toISOString()
     };
 
-    // Store in localStorage for instant results page loading
     localStorage.setItem('temp-assessment-results', JSON.stringify(resultData));
 
     try {
-      // Fire and forget the Firestore update to allow immediate transition
+      // Background save to Firestore
       setDoc(doc(db, 'users', guestId), { 
         assessment: resultData, 
         id: guestId, 
@@ -106,14 +105,12 @@ export default function AssessmentPage() {
       toast({ title: "Analysis Complete", description: "Your professional blueprint is ready." });
       router.push('/assessment/results');
     } catch (err) { 
-      // Redirect anyway since we saved to localStorage
       router.push('/assessment/results');
     } finally { 
       setIsSaving(false); 
     }
   };
 
-  // Minimal hydration screen to prevent flash
   if (!isHydrated) return null;
 
   if (step === 0) {
@@ -148,7 +145,7 @@ export default function AssessmentPage() {
               <Button type="submit" className="w-full h-16 text-xl font-black rounded-[1.5rem] shadow-xl">
                 Start Questionnaire
               </Button>
-              <p className="text-[10px] text-center text-muted-foreground uppercase font-bold tracking-widest">
+              <p className="text-[10px] text-center text-muted-foreground uppercase font-bold tracking-widest pt-4">
                 Designed by Sidmadina Technologies
               </p>
             </form>

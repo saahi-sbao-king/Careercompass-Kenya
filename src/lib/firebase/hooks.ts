@@ -83,7 +83,6 @@ export function useDoc(path: string | null) {
         setData(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null);
         setLoading(false);
       }, (error) => {
-        console.error(`[useDoc] Error at ${path}:`, error);
         if (error.code === 'permission-denied') {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
             operation: 'get',
@@ -143,18 +142,8 @@ export function useCollection(path: string | null, ...constraints: QueryConstrai
 }
 
 /**
- * Basic Auth User Hook
+ * Basic Auth User Hook (Compatibility)
  */
 export function useUser() {
-  const [user, setUser] = useState<any>(null);
-  const [userData, setUserData] = useState<DocumentData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // This hook is kept for components that might still reference it
-    // But most logic now uses the Auth.js session
-    setLoading(false);
-  }, []);
-
-  return { user, userData, loading };
+  return { user: null, userData: null, loading: false };
 }
