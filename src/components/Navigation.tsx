@@ -9,7 +9,7 @@ import { AccessibilityOptions } from '@/components/AccessibilityOptions';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 export function Navigation() {
   const { data: session } = useSession();
@@ -64,21 +64,23 @@ export function Navigation() {
               </Link>
             ) : (
               <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="font-black text-primary gap-2"
-                  onClick={() => signIn("google")}
-                >
-                  <LogIn className="h-4 w-4" /> Sign In
-                </Button>
-                <Button 
-                  size="sm" 
-                  className="font-black gap-2 rounded-xl px-5"
-                  onClick={() => signIn("google")}
-                >
-                  <UserPlus className="h-4 w-4" /> Sign Up
-                </Button>
+                <Link href="/login">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="font-black text-primary gap-2"
+                  >
+                    <LogIn className="h-4 w-4" /> Sign In
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button 
+                    size="sm" 
+                    className="font-black gap-2 rounded-xl px-5"
+                  >
+                    <UserPlus className="h-4 w-4" /> Sign Up
+                  </Button>
+                </Link>
               </div>
             )}
             
@@ -112,8 +114,8 @@ export function Navigation() {
               <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="font-black text-primary text-lg flex items-center gap-3"><Target className="h-5 w-5" /> Dashboard</Link>
             ) : (
               <>
-                <button onClick={() => signIn("google")} className="w-full text-left font-black text-primary text-lg flex items-center gap-3"><LogIn className="h-5 w-5" /> Sign In</button>
-                <button onClick={() => signIn("google")} className="w-full text-left font-black text-primary text-lg flex items-center gap-3"><UserPlus className="h-5 w-5" /> Sign Up</button>
+                <Link href="/login" onClick={() => setIsMenuOpen(false)} className="font-black text-primary text-lg flex items-center gap-3"><LogIn className="h-5 w-5" /> Sign In</Link>
+                <Link href="/signup" onClick={() => setIsMenuOpen(false)} className="font-black text-primary text-lg flex items-center gap-3"><UserPlus className="h-5 w-5" /> Sign Up</Link>
               </>
             )}
             {isAdmin && (
