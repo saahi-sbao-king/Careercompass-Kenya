@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Compass, ShieldCheck, LogIn, Loader2, Info } from "lucide-react";
+import { Compass, ShieldCheck, LogIn, Loader2, Info, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -44,11 +44,14 @@ export default function LoginPage() {
   return (
     <div className="container flex items-center justify-center min-h-[calc(100vh-64px)] px-4 mx-auto py-12">
       <Card className="w-full max-w-md border-primary/10 shadow-2xl rounded-[2.5rem] overflow-hidden">
-        <CardHeader className="space-y-4 text-center bg-primary/5 pb-10 border-b">
-          <div className="mx-auto w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center shadow-xl">
+        <CardHeader className="space-y-4 text-center bg-primary/5 pb-10 border-b relative">
+          <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+             <Sparkles className="h-24 w-24 text-primary" />
+          </div>
+          <div className="mx-auto w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center shadow-xl relative z-10">
             <Compass className="h-8 w-8" />
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1 relative z-10">
             <CardTitle className="text-3xl font-black">Karibu Tena</CardTitle>
             <CardDescription className="font-medium">Sign in to access your professional roadmap.</CardDescription>
           </div>
@@ -56,7 +59,7 @@ export default function LoginPage() {
         <CardContent className="pt-10 space-y-6">
           <form onSubmit={handleCredentialsLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-primary/60 ml-1">Email Address</Label>
               <Input 
                 id="email" 
                 type="email" 
@@ -64,13 +67,13 @@ export default function LoginPage() {
                 required 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-12 rounded-xl"
+                className="h-12 rounded-xl bg-muted/30 border-none font-bold"
               />
             </div>
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="password">Password</Label>
-                <Link href="#" className="text-xs text-primary hover:underline font-medium">Forgot password?</Link>
+              <div className="flex justify-between items-center px-1">
+                <Label htmlFor="password" title="Enter Password" className="text-[10px] font-black uppercase tracking-widest text-primary/60">Password</Label>
+                <Link href="/auth/forgot-password" title="Forgot Password" className="text-[10px] text-primary hover:underline font-black uppercase tracking-widest">Forgot?</Link>
               </div>
               <Input 
                 id="password" 
@@ -78,36 +81,39 @@ export default function LoginPage() {
                 required 
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-12 rounded-xl"
+                className="h-12 rounded-xl bg-muted/30 border-none font-bold"
                 placeholder="admin123"
               />
             </div>
             <Button 
               type="submit" 
-              className="w-full h-14 text-lg font-black rounded-2xl shadow-xl mt-2"
+              className="w-full h-14 text-lg font-black rounded-2xl shadow-xl mt-2 transition-transform hover:scale-[1.02] active:scale-[0.98]"
               disabled={loading}
             >
               {loading ? <Loader2 className="animate-spin mr-2" /> : <LogIn className="h-5 w-5 mr-2" />}
-              Login
+              Sign In
             </Button>
           </form>
 
-          <div className="p-4 bg-muted/50 rounded-2xl border border-dashed flex items-start gap-3">
-            <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+          <div className="p-5 bg-primary/5 rounded-2xl border-2 border-dashed border-primary/20 flex items-start gap-4">
+            <div className="p-2 bg-primary text-white rounded-lg shadow-lg">
+               <Info className="h-4 w-4" />
+            </div>
             <div className="space-y-1">
-              <p className="text-xs font-black uppercase text-primary tracking-widest">Demo Account Access</p>
-              <p className="text-[10px] text-muted-foreground font-medium">Use <b>admin@example.com</b> / <b>admin123</b> to evaluate the platform instantly.</p>
+              <p className="text-[10px] font-black uppercase text-primary tracking-widest">Demo Strategic Access</p>
+              <p className="text-[11px] text-muted-foreground font-bold leading-tight">Use <b>admin@example.com</b> / <b>admin123</b> to evaluate the platform instantly.</p>
             </div>
           </div>
 
           <div className="relative flex items-center py-2">
             <div className="flex-grow border-t border-muted"></div>
-            <span className="flex-shrink mx-4 text-xs text-muted-foreground uppercase font-bold tracking-widest">Or</span>
+            <span className="flex-shrink mx-4 text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em]">Or Continue With</span>
             <div className="flex-grow border-t border-muted"></div>
           </div>
 
           <Button 
-            className="w-full h-14 text-md font-bold rounded-2xl gap-3 shadow-md bg-white text-foreground border border-muted-foreground/20 hover:bg-muted/50 transition-colors" 
+            variant="outline"
+            className="w-full h-14 text-sm font-black rounded-2xl gap-3 shadow-sm bg-white text-foreground border-primary/10 hover:bg-muted/50 transition-all" 
             onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -128,19 +134,19 @@ export default function LoginPage() {
                 fill="#EA4335"
               />
             </svg>
-            Continue with Google
+            Google Identity
           </Button>
 
-          <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-xl border border-dashed">
-            <ShieldCheck className="h-5 w-5 text-primary opacity-50" />
-            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-relaxed text-center">
-              Secured by Sidmadina Technologies. Your professional data is private.
+          <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-xl border border-dashed justify-center">
+            <ShieldCheck className="h-4 w-4 text-primary opacity-50" />
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em]">
+              Secured by Sidmadina Technologies.
             </p>
           </div>
         </CardContent>
         <CardFooter className="bg-muted/20 py-6 border-t flex justify-center">
-          <p className="text-sm text-muted-foreground">
-            Don't have an account? <Link href="/signup" className="text-primary font-bold hover:underline">Sign up</Link>
+          <p className="text-xs text-muted-foreground font-bold">
+            Don't have an account? <Link href="/signup" className="text-primary font-black hover:underline uppercase tracking-widest ml-1">Create One</Link>
           </p>
         </CardFooter>
       </Card>
