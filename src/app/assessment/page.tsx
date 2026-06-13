@@ -19,7 +19,8 @@ import {
   Brain,
   ChevronRight,
   ChevronLeft,
-  Target
+  Target,
+  Sparkles
 } from 'lucide-react';
 
 export default function AssessmentPage() {
@@ -43,7 +44,7 @@ export default function AssessmentPage() {
         const info = data.userInfo || { name: '', age: '', school: '', grade: '', phone: '' };
         setUserInfo(info);
         if (info.name && info.name.length > 2) {
-          setStep(1);
+          setStep(data.step || 1);
         }
       } catch (e) { console.error(e); }
     }
@@ -71,23 +72,25 @@ export default function AssessmentPage() {
     if (!guestId || !db) return;
     setIsSaving(true);
     
-    const intelligenceScores: Record<string, number> = {};
-    MI_QUESTIONS.forEach(q => {
-      const score = answers[q.id] || 0;
-      intelligenceScores[q.type] = (intelligenceScores[q.type] || 0) + score;
-    });
-
-    const resultData = {
-      pathway: calculatePathway(intelligenceScores),
-      scores: intelligenceScores,
-      userInfo,
-      completedAt: new Date().toISOString()
-    };
-
-    localStorage.setItem('temp-assessment-results', JSON.stringify(resultData));
-
     try {
-      setDoc(doc(db, 'users', guestId), { 
+      const intelligenceScores: Record<string, number> = {};
+      MI_QUESTIONS.forEach(q => {
+        const score = answers[q.id] || 0;
+        intelligenceScores[q.type] = (intelligenceScores[q.type] || 0) + score;
+      });
+
+      const resultData = {
+        pathway: calculatePathway(intelligenceScores),
+        scores: intelligenceScores,
+        userInfo,
+        completedAt: new Date().toISOString()
+      };
+
+      // Set local storage first for instant accessibility
+      localStorage.setItem('temp-assessment-results', JSON.stringify(resultData));
+
+      // Attempt to save to Firestore
+      await setDoc(doc(db, 'users', guestId), { 
         assessment: resultData, 
         id: guestId, 
         username: userInfo.name,
@@ -98,6 +101,8 @@ export default function AssessmentPage() {
       toast({ title: "Blueprint Finalized", description: "Your professional roadmap is ready." });
       router.push('/assessment/results');
     } catch (err) { 
+      console.error("Save Error:", err);
+      // Still redirect because we have the local copy
       router.push('/assessment/results');
     } finally { 
       setIsSaving(false); 
@@ -171,30 +176,30 @@ export default function AssessmentPage() {
       <Progress value={progressPercent} className="h-2 rounded-full bg-primary/10" />
       
       <Card className="min-h-[600px] flex flex-col justify-between rounded-[4rem] overflow-hidden shadow-2xl border-primary/5">
-        <CardHeader className="bg-primary text-white p-16 relative overflow-hidden">
+        <CardHeader className="bg-primary text-white p-12 md:p-16 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-12 opacity-10"><Target size={160} /></div>
           <span className="px-4 py-1.5 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest w-fit mb-6 block backdrop-blur-xl">
              Focus Area: {currentQuestion.type}
           </span>
-          <CardTitle className="text-3xl md:text-4xl font-black leading-tight tracking-tighter">
+          <CardTitle className="text-2xl md:text-4xl font-black leading-tight tracking-tighter">
             {currentQuestion.text}
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="p-16">
+        <CardContent className="p-8 md:p-16">
           <RadioGroup value={answers[currentQuestion.id]?.toString()} onValueChange={handleAnswerChange} className="grid gap-4">
             {[5, 4, 3, 2, 1].map(v => (
               <div 
                 key={v} 
                 onClick={() => handleAnswerChange(v.toString())} 
-                className={`flex items-center space-x-4 p-6 border-2 rounded-3xl cursor-pointer transition-all ${
+                className={`flex items-center space-x-4 p-4 md:p-6 border-2 rounded-3xl cursor-pointer transition-all ${
                   answers[currentQuestion.id] === v 
                     ? 'border-primary bg-primary/5 shadow-xl scale-[1.03]' 
                     : 'border-transparent bg-muted/30 hover:bg-muted/50'
                 }`}
               >
                 <RadioGroupItem value={v.toString()} id={`v-${v}`} />
-                <Label htmlFor={`v-${v}`} className="flex-1 font-black text-xl cursor-pointer">
+                <Label htmlFor={`v-${v}`} className="flex-1 font-black text-lg md:text-xl cursor-pointer">
                   {v === 5 && "Strongly Agree"}
                   {v === 4 && "Agree"}
                   {v === 3 && "Neutral"}
@@ -206,12 +211,12 @@ export default function AssessmentPage() {
           </RadioGroup>
         </CardContent>
         
-        <CardFooter className="flex justify-between p-16 pt-0">
+        <CardFooter className="flex justify-between p-8 md:p-16 pt-0">
           <Button 
             variant="ghost" 
             onClick={() => setCurrentQuestionIdx(i => i - 1)} 
             disabled={currentQuestionIdx === 0}
-            className="h-14 px-8 rounded-xl font-black gap-2"
+            className="h-14 px-4 md:px-8 rounded-xl font-black gap-2"
           >
             <ChevronLeft /> Previous
           </Button>
@@ -220,15 +225,16 @@ export default function AssessmentPage() {
             <Button 
               onClick={calculateResults} 
               disabled={!answers[currentQuestion.id] || isSaving} 
-              className="h-16 px-12 rounded-2xl font-black shadow-2xl text-xl"
+              className="h-16 px-8 md:px-12 rounded-2xl font-black shadow-2xl text-lg md:text-xl gap-2"
             >
-              {isSaving ? <Loader2 className="animate-spin" /> : "Finalize Roadmap"}
+              {isSaving ? <Loader2 className="animate-spin" /> : <Sparkles className="h-5 w-5" />}
+              Finalize Roadmap
             </Button>
           ) : (
             <Button 
               onClick={() => setCurrentQuestionIdx(i => i + 1)} 
               disabled={!answers[currentQuestion.id]} 
-              className="h-16 px-12 rounded-2xl font-black shadow-2xl text-xl"
+              className="h-16 px-8 md:px-12 rounded-2xl font-black shadow-2xl text-lg md:text-xl"
             >
               Next Question <ChevronRight />
             </Button>

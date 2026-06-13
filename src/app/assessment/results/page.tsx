@@ -4,10 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { 
-  User, 
   Award, 
   Briefcase, 
-  ListChecks, 
   Brain, 
   ArrowLeft, 
   Download,
@@ -16,12 +14,16 @@ import {
   BarChart3,
   Lightbulb,
   Zap,
-  Target
+  Target,
+  GraduationCap,
+  History,
+  Compass
 } from 'lucide-react';
 import { useGuestUser } from '@/lib/firebase/hooks';
 import { 
   INTEL_DESCRIPTIONS,
-  getLevel 
+  getLevel,
+  IntelligenceType 
 } from '@/lib/assessment-data';
 import { cn } from '@/lib/utils';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -37,6 +39,7 @@ import {
   Cell
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 const intelligenceMetadata: Record<string, { label: string; color: string; hex: string; bg: string }> = {
   "Linguistic": { label: "Linguistic", color: "bg-indigo-600", hex: "#4f46e5", bg: "bg-indigo-50" },
@@ -50,15 +53,25 @@ const intelligenceMetadata: Record<string, { label: string; color: string; hex: 
   "Bodily-Kinesthetic": { label: "Bodily-Kinesthetic", color: "bg-rose-500", hex: "#f43f5e", bg: "bg-rose-50" },
 };
 
+const careerClusters = [
+  "STEM Careers", "Health Sciences", "Business and Entrepreneurship", 
+  "Creative Arts and Design", "Education and Training", 
+  "Agriculture and Environmental Sciences", "Information Technology",
+  "Media and Communication", "Skilled Trades and Technical Careers",
+  "Public Service and Leadership"
+];
+
 export default function ResultsPage() {
   const router = useRouter();
   const { guestData } = useGuestUser();
   const [results, setResults] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const schoolLogo = PlaceHolderImages.find(img => img.id === 'school-logo')?.imageUrl || '';
 
   useEffect(() => {
+    setIsMounted(true);
     if (guestData?.assessment) {
       setResults(guestData.assessment);
     } else {
@@ -95,9 +108,10 @@ export default function ResultsPage() {
   if (!results) {
     return (
       <div className="container py-24 text-center space-y-4">
-        <h2 className="text-2xl font-black text-primary">Strategic Analysis Missing</h2>
-        <p className="text-muted-foreground">Complete the questionnaire to view your blueprint.</p>
-        <Button onClick={() => router.push('/assessment')} className="rounded-xl h-14 px-10 font-black">Start Quiz</Button>
+        <Loader2 className="animate-spin mx-auto h-12 w-12 text-primary" />
+        <h2 className="text-2xl font-black text-primary">Strategic Analysis in Progress</h2>
+        <p className="text-muted-foreground">Retrieving your professional roadmap...</p>
+        <Button onClick={() => router.push('/assessment')} className="rounded-xl h-14 px-10 font-black">Restart Assessment</Button>
       </div>
     );
   }
@@ -109,6 +123,8 @@ export default function ResultsPage() {
     value: Math.round(value as number),
     fill: intelligenceMetadata[name]?.hex || '#4338ca'
   }));
+
+  const devAreas = sortedIntelligences.slice(-3).reverse();
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8 flex flex-col items-center">
@@ -132,64 +148,65 @@ export default function ResultsPage() {
       <div className="w-full max-w-5xl bg-white shadow-2xl rounded-[3rem] overflow-hidden border border-primary/5 flex flex-col">
         
         {/* Header */}
-        <header className="bg-primary text-white p-12 relative overflow-hidden">
+        <header className="bg-primary text-white p-8 md:p-12 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-12 opacity-10"><Brain className="h-48 w-48" /></div>
           <div className="relative z-10 space-y-6">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-200">Official Intelligence Assessment</p>
-                <h1 className="text-4xl md:text-6xl font-black tracking-tighter">Career Intelligence Blueprint</h1>
-                <p className="text-xl font-medium opacity-90 mt-2">Designed by Sidmadina Technologies.</p>
+                <h1 className="text-3xl md:text-6xl font-black tracking-tighter">Career Intelligence Blueprint</h1>
+                <p className="text-lg md:text-xl font-medium opacity-90 mt-2">Designed by Sidmadina Technologies.</p>
               </div>
               <div className="hidden sm:block p-2 bg-white rounded-2xl shadow-2xl">
-                <img src={schoolLogo} alt="School Logo" className="h-20 w-20 object-contain" />
+                <img src={schoolLogo} alt="School Logo" className="h-16 w-16 md:h-20 md:w-20 object-contain" />
               </div>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-white/10">
-              <div><p className="text-[10px] font-black uppercase text-blue-200">Scholar</p><p className="font-bold text-lg">{results.userInfo?.name || 'Scholar'}</p></div>
-              <div><p className="text-[10px] font-black uppercase text-blue-200">Academic Level</p><p className="font-bold text-lg">{results.userInfo?.grade || 'Grade 10'}</p></div>
-              <div><p className="text-[10px] font-black uppercase text-blue-200">Institution</p><p className="font-bold text-lg">{results.userInfo?.school || 'Frere Town Secondary'}</p></div>
-              <div><p className="text-[10px] font-black uppercase text-blue-200">Report Date</p><p className="font-bold text-lg">{new Date().toLocaleDateString()}</p></div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 pt-8 border-t border-white/10">
+              <div><p className="text-[10px] font-black uppercase text-blue-200">Scholar</p><p className="font-bold text-sm md:text-lg">{results.userInfo?.name || 'Scholar'}</p></div>
+              <div><p className="text-[10px] font-black uppercase text-blue-200">Academic Level</p><p className="font-bold text-sm md:text-lg">{results.userInfo?.grade || 'Grade 10'}</p></div>
+              <div><p className="text-[10px] font-black uppercase text-blue-200">Institution</p><p className="font-bold text-sm md:text-lg">{results.userInfo?.school || 'Frere Town Secondary'}</p></div>
+              <div><p className="text-[10px] font-black uppercase text-blue-200">Report Date</p><p className="font-bold text-sm md:text-lg">{new Date().toLocaleDateString()}</p></div>
             </div>
           </div>
         </header>
 
-        {/* Content Tabs/Sections */}
-        <div className="p-12 space-y-20">
+        <div className="p-6 md:p-12 space-y-20">
           
           {/* Section 1: Profile Summary */}
           <section className="space-y-10">
             <div className="flex items-center gap-4 border-l-8 border-primary pl-6">
               <div className="p-3 bg-primary text-white rounded-2xl shadow-xl"><BarChart3 className="h-8 w-8" /></div>
               <div>
-                <h2 className="text-3xl font-black">Intelligence Profile Summary</h2>
+                <h2 className="text-2xl md:text-3xl font-black">Intelligence Profile Summary</h2>
                 <p className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Performance Visual Analytics</p>
               </div>
             </div>
             
             <div className="grid md:grid-cols-3 gap-10">
-              <div className="md:col-span-2 h-[400px] bg-muted/20 rounded-[2.5rem] p-10 border-2 border-dashed">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} layout="vertical">
-                    <XAxis type="number" hide domain={[0, 25]} />
-                    <YAxis dataKey="name" type="category" hide />
-                    <Tooltip 
-                      cursor={{ fill: 'transparent' }}
-                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontWeight: 'black' }}
-                    />
-                    <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={24}>
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="md:col-span-2 h-[400px] bg-muted/20 rounded-[2.5rem] p-6 md:p-10 border-2 border-dashed">
+                {isMounted && (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} layout="vertical">
+                      <XAxis type="number" hide domain={[0, 25]} />
+                      <YAxis dataKey="name" type="category" hide />
+                      <Tooltip 
+                        cursor={{ fill: 'transparent' }}
+                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontWeight: 'black' }}
+                      />
+                      <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={24}>
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </div>
               <div className="space-y-4">
                  <div className="p-8 bg-primary text-white rounded-[2.5rem] shadow-xl text-center">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Recommended Pathway</p>
-                    <p className="text-4xl font-black mt-2">{results.pathway}</p>
+                    <p className="text-3xl md:text-4xl font-black mt-2">{results.pathway}</p>
                  </div>
                  <div className="p-6 bg-white border-2 rounded-[2rem] space-y-4">
                     <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Score Distribution</p>
@@ -213,29 +230,31 @@ export default function ResultsPage() {
             <div className="flex items-center gap-4 border-l-8 border-secondary pl-6">
               <div className="p-3 bg-secondary text-white rounded-2xl shadow-xl"><Award className="h-8 w-8" /></div>
               <div>
-                <h2 className="text-3xl font-black">Top Dominant Intelligences</h2>
+                <h2 className="text-2xl md:text-3xl font-black">Top Dominant Intelligences</h2>
                 <p className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Core Professional Pillars</p>
               </div>
             </div>
 
             <div className="grid gap-8">
               {topThree.map(([name, score]: any, i) => {
-                const meta = INTEL_DESCRIPTIONS[name as keyof typeof INTEL_DESCRIPTIONS];
-                const styles = intelligenceMetadata[name as keyof typeof intelligenceMetadata];
+                const meta = INTEL_DESCRIPTIONS[name as IntelligenceType];
+                const styles = intelligenceMetadata[name];
                 return (
                   <Card key={name} className="border-none shadow-xl rounded-[2.5rem] overflow-hidden group hover:-translate-y-1 transition-all">
                     <div className={cn("h-3 w-full", styles.color)} />
-                    <CardHeader className="p-10 flex flex-col md:flex-row justify-between items-start gap-6 bg-muted/30">
+                    <CardHeader className="p-8 md:p-10 flex flex-col md:flex-row justify-between items-start gap-6 bg-muted/30">
                       <div className="space-y-2">
                         <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Dominance Ranking: #{i+1}</span>
-                        <CardTitle className="text-4xl font-black">{name}</CardTitle>
-                        <Badge className={cn("font-black", styles.bg, styles.color.replace('bg-', 'text-'))}>{getLevel(score)} ({score}/25)</Badge>
+                        <CardTitle className="text-3xl md:text-4xl font-black">{name}</CardTitle>
+                        <Badge className={cn("font-black", styles.bg, styles.color.replace('bg-', 'text-'))}>
+                          {getLevel(score)} ({score}/25)
+                        </Badge>
                       </div>
                       <div className="p-4 bg-white rounded-2xl shadow-sm italic text-muted-foreground font-medium max-w-sm">
                         "{meta.desc}"
                       </div>
                     </CardHeader>
-                    <CardContent className="p-10 grid md:grid-cols-2 gap-12">
+                    <CardContent className="p-8 md:p-10 grid md:grid-cols-2 gap-12">
                       <div className="space-y-6">
                         <div className="space-y-3">
                           <h4 className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-primary"><Zap size={14} /> Key Strengths</h4>
@@ -247,9 +266,9 @@ export default function ResultsPage() {
                         </div>
                       </div>
                       <div className="p-8 bg-muted/20 rounded-[2rem] border-2 border-dashed space-y-4">
-                        <h4 className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-muted-foreground"><Lightbulb size={14} /> Best Learning Style</h4>
+                        <h4 className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-muted-foreground"><Lightbulb size={14} /> Recommended Strategies</h4>
                         <ul className="space-y-2">
-                          {meta.styles.map(s => <li key={s} className="text-sm font-bold text-slate-700 flex items-start gap-2"><div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5" /> {s}</li>)}
+                          {meta.strategies.map(s => <li key={s} className="text-sm font-bold text-slate-700 flex items-start gap-2"><div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5" /> {s}</li>)}
                         </ul>
                       </div>
                     </CardContent>
@@ -259,44 +278,76 @@ export default function ResultsPage() {
             </div>
           </section>
 
-          {/* Section 3: Recommended Clusters & Strategies */}
+          {/* Section 3: Clusters & Learning Style */}
           <div className="grid md:grid-cols-2 gap-10">
             <Card className="rounded-[3rem] border-none shadow-2xl bg-primary text-white p-12 overflow-hidden relative">
               <div className="absolute top-0 right-0 p-8 opacity-10"><Target size={120} /></div>
               <h3 className="text-3xl font-black mb-8">Career Clusters</h3>
               <div className="grid gap-3">
-                {["STEM Careers", "Health Sciences", "Creative Arts & Design", "Agriculture & Environment", "Public Service & Leadership"].map(c => (
-                  <div key={c} className="p-4 bg-white/10 rounded-2xl border border-white/10 font-bold flex items-center gap-3">
+                {careerClusters.map(c => (
+                  <div key={c} className="p-4 bg-white/10 rounded-2xl border border-white/10 font-bold flex items-center gap-3 text-sm">
                     <div className="h-2 w-2 rounded-full bg-secondary shadow-2xl" /> {c}
                   </div>
                 ))}
               </div>
             </Card>
 
-            <Card className="rounded-[3rem] border-none shadow-2xl bg-white p-12 overflow-hidden">
-               <h3 className="text-3xl font-black mb-8">Study Strategy</h3>
+            <Card className="rounded-[3rem] border-none shadow-2xl bg-white p-12 overflow-hidden border">
+               <h3 className="text-3xl font-black mb-8 text-primary">Learning DNA</h3>
                <div className="space-y-6">
                   {topThree.map(([name]: any) => (
                     <div key={name} className="p-6 bg-muted/30 rounded-2xl space-y-2">
-                       <h4 className="text-[10px] font-black uppercase text-primary tracking-widest">{name} Mode</h4>
-                       <p className="text-sm font-bold text-slate-700">{INTEL_DESCRIPTIONS[name as keyof typeof INTEL_DESCRIPTIONS].strategies[0]}</p>
+                       <h4 className="text-[10px] font-black uppercase text-primary tracking-widest">{name} Learning Style</h4>
+                       <p className="text-sm font-bold text-slate-700">{INTEL_DESCRIPTIONS[name as IntelligenceType].styles[0]}</p>
                     </div>
                   ))}
+                  <div className="pt-6 border-t">
+                    <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-4">Development Areas</h4>
+                    <div className="space-y-3">
+                       {devAreas.map(([name, score]: any) => (
+                         <div key={name} className="flex justify-between items-center text-sm font-bold">
+                            <span className="text-slate-600">{name}</span>
+                            <Badge variant="outline" className="text-[10px] opacity-70">Focus Required</Badge>
+                         </div>
+                       ))}
+                    </div>
+                  </div>
                </div>
             </Card>
           </div>
 
           {/* Section 4: Guidance Summary */}
-          <section className="bg-secondary text-white p-16 rounded-[4rem] text-center space-y-8 relative overflow-hidden shadow-2xl">
+          <section className="bg-secondary text-white p-10 md:p-16 rounded-[4rem] text-center space-y-8 relative overflow-hidden shadow-2xl">
              <div className="absolute inset-0 opacity-10 pointer-events-none">
-                <Brain className="h-[600px] w-[600px] -bottom-40 -left-40 absolute" />
+                <Compass className="h-[600px] w-[600px] -bottom-40 -left-40 absolute" />
              </div>
-             <h3 className="text-4xl font-black">Strategic Guidance Summary</h3>
-             <p className="text-xl font-medium max-w-3xl mx-auto opacity-90">Your intelligence profile indicates strong potential in {topThree[0][0]} and {topThree[1][0]}. We recommend focusing on the {results.pathway} pathway for Senior School specialization.</p>
+             <h3 className="text-3xl md:text-4xl font-black">Strategic Guidance Summary</h3>
+             <p className="text-lg md:text-xl font-medium max-w-3xl mx-auto opacity-90">
+               Your intelligence profile indicates strong potential in <span className="font-black underline">{topThree[0][0]}</span> and <span className="font-black underline">{topThree[1][0]}</span>. 
+               We recommend focusing on the <span className="bg-white/20 px-2 rounded">{results.pathway}</span> pathway for Senior School specialization.
+             </p>
              <div className="flex flex-wrap justify-center gap-4 pt-4">
-                <Button variant="secondary" className="rounded-2xl h-16 px-10 text-lg font-black bg-white text-secondary hover:bg-white/90">Explore University Courses</Button>
-                <Button variant="ghost" className="rounded-2xl h-16 px-10 text-lg font-black text-white hover:bg-white/10">Consult a Counselor</Button>
+                <Button onClick={() => router.push('/subject-combination')} variant="secondary" className="rounded-2xl h-16 px-10 text-lg font-black bg-white text-secondary hover:bg-white/90">Analyze Subject Mix</Button>
+                <Button onClick={() => router.push('/exploration')} variant="ghost" className="rounded-2xl h-16 px-10 text-lg font-black text-white hover:bg-white/10">Explore Careers</Button>
              </div>
+          </section>
+
+          {/* Next Steps */}
+          <section className="p-12 bg-slate-900 text-white rounded-[3rem] space-y-8">
+            <h3 className="text-2xl font-black flex items-center gap-3"><History className="text-secondary" /> Strategic Next Steps</h3>
+            <div className="grid md:grid-cols-2 gap-8">
+              {[
+                "Complete the Passion, Interest and Abilities Assessment on the Exploration page.",
+                "Explore recommended career pathways aligned with your pathway.",
+                "Research relevant university, college and TVET programmes in Kenya.",
+                "Consult a teacher, parent or career counselor for further guidance."
+              ].map((step, i) => (
+                <div key={i} className="flex gap-4 items-start">
+                  <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center font-black flex-shrink-0">{i+1}</div>
+                  <p className="text-sm md:text-base font-medium opacity-80">{step}</p>
+                </div>
+              ))}
+            </div>
           </section>
 
         </div>
@@ -316,6 +367,10 @@ export default function ResultsPage() {
         </footer>
 
       </div>
+      
+      <p className="mt-8 text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground opacity-50">
+        Discover. Learn. Succeed.
+      </p>
     </div>
   );
 }
