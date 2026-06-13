@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { 
@@ -15,7 +15,6 @@ import {
   Lightbulb,
   Zap,
   Target,
-  GraduationCap,
   History,
   Compass
 } from 'lucide-react';
@@ -33,12 +32,11 @@ import {
   Bar, 
   XAxis, 
   YAxis, 
-  CartesianGrid, 
   Tooltip, 
   ResponsiveContainer, 
   Cell
 } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 const intelligenceMetadata: Record<string, { label: string; color: string; hex: string; bg: string }> = {
@@ -68,13 +66,14 @@ export default function ResultsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  const schoolLogo = PlaceHolderImages.find(img => img.id === 'school-logo')?.imageUrl || '';
-
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (guestData?.assessment) {
       setResults(guestData.assessment);
-    } else {
+    } else if (typeof window !== 'undefined') {
       const temp = localStorage.getItem('temp-assessment-results');
       if (temp) {
         try {
@@ -85,6 +84,23 @@ export default function ResultsPage() {
       }
     }
   }, [guestData]);
+
+  const schoolLogo = PlaceHolderImages.find(img => img.id === 'school-logo')?.imageUrl || '';
+
+  const dataAnalysis = useMemo(() => {
+    if (!results || !results.scores) return null;
+
+    const sorted = Object.entries(results.scores).sort(([, a]: any, [, b]: any) => b - a);
+    const topThree = sorted.slice(0, 3);
+    const chart = Object.entries(results.scores).map(([name, value]) => ({
+      name,
+      value: Math.round(value as number),
+      fill: intelligenceMetadata[name]?.hex || '#4338ca'
+    }));
+    const development = sorted.slice(-3).reverse();
+
+    return { sorted, topThree, chart, development };
+  }, [results]);
 
   const handleDownload = async () => {
     if (!results) return;
@@ -105,7 +121,7 @@ export default function ResultsPage() {
     }
   };
 
-  if (!results) {
+  if (!results || !dataAnalysis) {
     return (
       <div className="container py-24 text-center space-y-4">
         <Loader2 className="animate-spin mx-auto h-12 w-12 text-primary" />
@@ -116,19 +132,8 @@ export default function ResultsPage() {
     );
   }
 
-  const sortedIntelligences = Object.entries(results.scores || {}).sort(([, a]: any, [, b]: any) => b - a);
-  const topThree = sortedIntelligences.slice(0, 3);
-  const chartData = Object.entries(results.scores).map(([name, value]) => ({
-    name,
-    value: Math.round(value as number),
-    fill: intelligenceMetadata[name]?.hex || '#4338ca'
-  }));
-
-  const devAreas = sortedIntelligences.slice(-3).reverse();
-
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8 flex flex-col items-center">
-      {/* Action Bar */}
       <div className="w-full max-w-5xl mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 print:hidden">
         <Button variant="ghost" onClick={() => router.push('/dashboard')} className="gap-2 text-slate-500 font-bold hover:text-primary">
           <ArrowLeft className="h-4 w-4" /> Command Center
@@ -144,10 +149,7 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* Main Report Document */}
       <div className="w-full max-w-5xl bg-white shadow-2xl rounded-[3rem] overflow-hidden border border-primary/5 flex flex-col">
-        
-        {/* Header */}
         <header className="bg-primary text-white p-8 md:p-12 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-12 opacity-10"><Brain className="h-48 w-48" /></div>
           <div className="relative z-10 space-y-6">
@@ -172,8 +174,6 @@ export default function ResultsPage() {
         </header>
 
         <div className="p-6 md:p-12 space-y-20">
-          
-          {/* Section 1: Profile Summary */}
           <section className="space-y-10">
             <div className="flex items-center gap-4 border-l-8 border-primary pl-6">
               <div className="p-3 bg-primary text-white rounded-2xl shadow-xl"><BarChart3 className="h-8 w-8" /></div>
@@ -187,7 +187,7 @@ export default function ResultsPage() {
               <div className="md:col-span-2 h-[400px] bg-muted/20 rounded-[2.5rem] p-6 md:p-10 border-2 border-dashed">
                 {isMounted && (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData} layout="vertical">
+                    <BarChart data={dataAnalysis.chart} layout="vertical">
                       <XAxis type="number" hide domain={[0, 25]} />
                       <YAxis dataKey="name" type="category" hide />
                       <Tooltip 
@@ -195,7 +195,7 @@ export default function ResultsPage() {
                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontWeight: 'black' }}
                       />
                       <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={24}>
-                        {chartData.map((entry, index) => (
+                        {dataAnalysis.chart.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
                       </Bar>
@@ -211,7 +211,7 @@ export default function ResultsPage() {
                  <div className="p-6 bg-white border-2 rounded-[2rem] space-y-4">
                     <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Score Distribution</p>
                     <div className="space-y-2">
-                       {sortedIntelligences.map(([name, score]: any) => (
+                       {dataAnalysis.sorted.map(([name, score]: any) => (
                          <div key={name} className="flex justify-between items-center text-xs font-black">
                             <span className="text-muted-foreground">{name}</span>
                             <span className={cn("px-2 py-0.5 rounded-md", intelligenceMetadata[name]?.bg, intelligenceMetadata[name]?.color.replace('bg-', 'text-'))}>
@@ -225,7 +225,6 @@ export default function ResultsPage() {
             </div>
           </section>
 
-          {/* Section 2: Top Dominant Intelligences */}
           <section className="space-y-12">
             <div className="flex items-center gap-4 border-l-8 border-secondary pl-6">
               <div className="p-3 bg-secondary text-white rounded-2xl shadow-xl"><Award className="h-8 w-8" /></div>
@@ -236,7 +235,7 @@ export default function ResultsPage() {
             </div>
 
             <div className="grid gap-8">
-              {topThree.map(([name, score]: any, i) => {
+              {dataAnalysis.topThree.map(([name, score]: any, i) => {
                 const meta = INTEL_DESCRIPTIONS[name as IntelligenceType];
                 const styles = intelligenceMetadata[name];
                 return (
@@ -278,7 +277,6 @@ export default function ResultsPage() {
             </div>
           </section>
 
-          {/* Section 3: Clusters & Learning Style */}
           <div className="grid md:grid-cols-2 gap-10">
             <Card className="rounded-[3rem] border-none shadow-2xl bg-primary text-white p-12 overflow-hidden relative">
               <div className="absolute top-0 right-0 p-8 opacity-10"><Target size={120} /></div>
@@ -295,7 +293,7 @@ export default function ResultsPage() {
             <Card className="rounded-[3rem] border-none shadow-2xl bg-white p-12 overflow-hidden border">
                <h3 className="text-3xl font-black mb-8 text-primary">Learning DNA</h3>
                <div className="space-y-6">
-                  {topThree.map(([name]: any) => (
+                  {dataAnalysis.topThree.map(([name]: any) => (
                     <div key={name} className="p-6 bg-muted/30 rounded-2xl space-y-2">
                        <h4 className="text-[10px] font-black uppercase text-primary tracking-widest">{name} Learning Style</h4>
                        <p className="text-sm font-bold text-slate-700">{INTEL_DESCRIPTIONS[name as IntelligenceType].styles[0]}</p>
@@ -304,7 +302,7 @@ export default function ResultsPage() {
                   <div className="pt-6 border-t">
                     <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-4">Development Areas</h4>
                     <div className="space-y-3">
-                       {devAreas.map(([name, score]: any) => (
+                       {dataAnalysis.development.map(([name, score]: any) => (
                          <div key={name} className="flex justify-between items-center text-sm font-bold">
                             <span className="text-slate-600">{name}</span>
                             <Badge variant="outline" className="text-[10px] opacity-70">Focus Required</Badge>
@@ -316,14 +314,13 @@ export default function ResultsPage() {
             </Card>
           </div>
 
-          {/* Section 4: Guidance Summary */}
           <section className="bg-secondary text-white p-10 md:p-16 rounded-[4rem] text-center space-y-8 relative overflow-hidden shadow-2xl">
              <div className="absolute inset-0 opacity-10 pointer-events-none">
                 <Compass className="h-[600px] w-[600px] -bottom-40 -left-40 absolute" />
              </div>
              <h3 className="text-3xl md:text-4xl font-black">Strategic Guidance Summary</h3>
              <p className="text-lg md:text-xl font-medium max-w-3xl mx-auto opacity-90">
-               Your intelligence profile indicates strong potential in <span className="font-black underline">{topThree[0][0]}</span> and <span className="font-black underline">{topThree[1][0]}</span>. 
+               Your intelligence profile indicates strong potential in <span className="font-black underline">{dataAnalysis.topThree[0][0]}</span> and <span className="font-black underline">{dataAnalysis.topThree[1][0]}</span>. 
                We recommend focusing on the <span className="bg-white/20 px-2 rounded">{results.pathway}</span> pathway for Senior School specialization.
              </p>
              <div className="flex flex-wrap justify-center gap-4 pt-4">
@@ -332,7 +329,6 @@ export default function ResultsPage() {
              </div>
           </section>
 
-          {/* Next Steps */}
           <section className="p-12 bg-slate-900 text-white rounded-[3rem] space-y-8">
             <h3 className="text-2xl font-black flex items-center gap-3"><History className="text-secondary" /> Strategic Next Steps</h3>
             <div className="grid md:grid-cols-2 gap-8">
@@ -349,10 +345,8 @@ export default function ResultsPage() {
               ))}
             </div>
           </section>
-
         </div>
 
-        {/* Footer */}
         <footer className="bg-primary text-white p-12 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="text-center md:text-left">
@@ -365,7 +359,6 @@ export default function ResultsPage() {
             </div>
           </div>
         </footer>
-
       </div>
       
       <p className="mt-8 text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground opacity-50">

@@ -86,10 +86,10 @@ export default function AssessmentPage() {
         completedAt: new Date().toISOString()
       };
 
-      // Set local storage first for instant accessibility
-      localStorage.setItem('temp-assessment-results', JSON.stringify(resultData));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('temp-assessment-results', JSON.stringify(resultData));
+      }
 
-      // Attempt to save to Firestore
       await setDoc(doc(db, 'users', guestId), { 
         assessment: resultData, 
         id: guestId, 
@@ -102,14 +102,18 @@ export default function AssessmentPage() {
       router.push('/assessment/results');
     } catch (err) { 
       console.error("Save Error:", err);
-      // Still redirect because we have the local copy
       router.push('/assessment/results');
     } finally { 
       setIsSaving(false); 
     }
   };
 
-  if (!isHydrated) return null;
+  if (!isHydrated) return (
+    <div className="p-24 text-center">
+      <Loader2 className="animate-spin mx-auto text-primary" />
+      <p className="mt-4 text-muted-foreground">Initializing questionnaire...</p>
+    </div>
+  );
 
   if (step === 0) {
     return (
