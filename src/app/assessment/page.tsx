@@ -52,7 +52,7 @@ export default function AssessmentPage() {
 
   const handleUserInfoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setStep(1); // Proceed directly to questionnaire
+    setStep(1);
   };
 
   const handleAnswerChange = (value: string) => {
@@ -62,7 +62,7 @@ export default function AssessmentPage() {
   };
 
   const calculateResults = async () => {
-    if (!guestId) return;
+    if (!guestId || !db) return;
     setIsSaving(true);
     const intelligenceScores: Record<string, number> = {};
     MI_QUESTIONS.forEach(q => {
@@ -72,7 +72,6 @@ export default function AssessmentPage() {
 
     const finalScores: Record<string, number> = {};
     Object.keys(intelligenceScores).forEach(type => { 
-      // Normalize to 0-100 scale (each category has 5 questions, max score 25)
       finalScores[type] = (intelligenceScores[type] / 25) * 100; 
     });
 
@@ -110,7 +109,7 @@ export default function AssessmentPage() {
           <CardHeader className="text-center bg-primary/5 pb-8 border-b">
             <UserCircle className="h-12 w-12 text-primary mx-auto mb-4" />
             <CardTitle className="text-2xl font-black">Information Hub</CardTitle>
-            <CardDescription>Enter your details to start the assessment. No payment required.</CardDescription>
+            <CardDescription>Enter your details to start the assessment. No account required.</CardDescription>
           </CardHeader>
           <CardContent className="pt-8">
             <form onSubmit={handleUserInfoSubmit} className="space-y-6">

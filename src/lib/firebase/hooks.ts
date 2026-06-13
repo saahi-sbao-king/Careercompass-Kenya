@@ -9,7 +9,6 @@ import { FirestorePermissionError } from '@/firebase/errors';
 /**
  * Guest Identity Hook
  * Uses a persistent identifier in localStorage to track student progress without accounts.
- * This is the primary identity system for CareerCompass Kenya.
  */
 export function useGuestUser() {
   const [guestId, setGuestId] = useState<string | null>(null);
@@ -17,6 +16,7 @@ export function useGuestUser() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Client-side only ID generation
     let id = localStorage.getItem('cck_guest_id');
     if (!id) {
       id = `scholar_${Math.random().toString(36).substr(2, 9)}`;
@@ -26,13 +26,14 @@ export function useGuestUser() {
   }, []);
 
   useEffect(() => {
-    if (!guestId) return;
+    if (!guestId || !db) return;
 
+    // Stable listener with error boundary
     const unsubscribe = onSnapshot(doc(db, 'users', guestId), (snapshot) => {
       setGuestData(snapshot.data() || null);
       setLoading(false);
     }, (error) => {
-      console.error("[useGuestUser] Identity Sync Error:", error);
+      console.warn("[useGuestUser] Identity Sync Warning (Non-Fatal):", error.message);
       setLoading(false);
     });
 
@@ -42,10 +43,6 @@ export function useGuestUser() {
   return { guestId, guestData, loading };
 }
 
-/**
- * Admin Access Hook
- * Stealth mode: check for a local verification flag.
- */
 export function useIsAdmin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -59,16 +56,12 @@ export function useIsAdmin() {
   return { isAdmin, loading };
 }
 
-/**
- * Generic Document Listener
- * Handles permission errors gracefully using the specialized error handling architecture.
- */
 export function useDoc(path: string | null) {
   const [data, setData] = useState<DocumentData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!path) {
+    if (!path || !db) {
       setData(null);
       setLoading(false);
       return;
@@ -79,13 +72,11 @@ export function useDoc(path: string | null) {
       setData(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null);
       setLoading(false);
     }, (error) => {
-      console.error(`[useDoc] Error at ${path}:`, error);
       if (error.code === 'permission-denied') {
-        const contextualError = new FirestorePermissionError({
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
           operation: 'get',
           path: path
-        });
-        errorEmitter.emit('permission-error', contextualError);
+        }));
       }
       setLoading(false);
     });
@@ -96,15 +87,11 @@ export function useDoc(path: string | null) {
   return { data, loading };
 }
 
-/**
- * Generic Collection Listener
- * Standardized query and listener implementation.
- */
 export function useCollection(path: string | null, ...constraints: QueryConstraint[]) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const q = useMemo(() => path ? query(collection(db, path), ...constraints) : null, [path, constraints]);
+  const q = useMemo(() => (path && db) ? query(collection(db, path), ...constraints) : null, [path, constraints]);
 
   useEffect(() => {
     if (!q) {
@@ -118,13 +105,11 @@ export function useCollection(path: string | null, ...constraints: QueryConstrai
       setData(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
     }, (error) => {
-      console.error(`[useCollection] Error at ${path}:`, error);
       if (error.code === 'permission-denied') {
-        const contextualError = new FirestorePermissionError({
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
           operation: 'list',
           path: path || 'unknown'
-        });
-        errorEmitter.emit('permission-error', contextualError);
+        }));
       }
       setLoading(false);
     });

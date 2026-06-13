@@ -15,9 +15,11 @@ export const firebaseConfig = {
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
+// Safe App Check Initialization
 if (typeof window !== 'undefined') {
   const siteKey = "6LcITm0sAAAAAHyJBIAJtqp4L6ixag3XrkaRMO_O";
   try {
+    // Only initialize once and catch failures to prevent "Failed to fetch" crashes
     if (!(window as any)._firebase_app_check_initialized) {
       initializeAppCheck(app, {
         provider: new ReCaptchaEnterpriseProvider(siteKey),
@@ -25,7 +27,9 @@ if (typeof window !== 'undefined') {
       });
       (window as any)._firebase_app_check_initialized = true;
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn("Firebase App Check failed to initialize. System will continue without it.");
+  }
 }
 
 export const db = getFirestore(app);
