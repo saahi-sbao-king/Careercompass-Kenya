@@ -1,9 +1,5 @@
 {
   "projects": {
-    "default": "career-navigator-00",
-    "Career Navigator Kenya": "career-navigator-00",
-    "DEFAULT": "career-navigator-00"
-  },
-  "targets": {},
-  "etags": {}
+    "default": "career-navigator-00"
+  }
 }
