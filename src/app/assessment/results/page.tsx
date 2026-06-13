@@ -14,10 +14,9 @@ import {
   Printer,
   Loader2,
   BarChart3,
-  PieChart as PieChartIcon,
-  TrendingUp
+  PieChart as PieChartIcon
 } from 'lucide-react';
-import { useUser } from '@/lib/firebase/hooks';
+import { useGuestUser } from '@/lib/firebase/hooks';
 import { 
   getRecommendedPassions, 
   getRecommendedAbilities, 
@@ -40,7 +39,7 @@ import {
   PieChart,
   Pie
 } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const intelligenceMetadata: Record<string, { label: string; color: string; hex: string; bg: string }> = {
   "Linguistic": { label: "Linguistic", color: "bg-indigo-600", hex: "#4f46e5", bg: "bg-indigo-50" },
@@ -56,15 +55,15 @@ const intelligenceMetadata: Record<string, { label: string; color: string; hex: 
 
 export default function ResultsPage() {
   const router = useRouter();
-  const { user, userData } = useUser();
+  const { guestData } = useGuestUser();
   const [results, setResults] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const schoolLogo = PlaceHolderImages.find(img => img.id === 'school-logo')?.imageUrl || '';
 
   useEffect(() => {
-    if (userData?.assessment) {
-      setResults(userData.assessment);
+    if (guestData?.assessment) {
+      setResults(guestData.assessment);
     } else {
       const temp = localStorage.getItem('temp-assessment-results');
       if (temp) {
@@ -75,14 +74,14 @@ export default function ResultsPage() {
         }
       }
     }
-  }, [userData]);
+  }, [guestData]);
 
   const handleDownload = async () => {
     if (!results) return;
     setIsGenerating(true);
     try {
       await generateCareerBlueprintPDF({
-        studentName: results.userInfo?.name || user?.displayName || 'Scholar',
+        studentName: results.userInfo?.name || 'Scholar',
         age: results.userInfo?.age || 'N/A',
         grade: results.userInfo?.grade || 'N/A',
         school: results.userInfo?.school || 'Frere Town Secondary School',
@@ -178,7 +177,7 @@ export default function ResultsPage() {
               <User size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-800">{results.userInfo?.name || user?.displayName || 'Scholar'}</h2>
+              <h2 className="text-lg font-bold text-slate-800">{results.userInfo?.name || 'Scholar'}</h2>
               <p className="text-[10px] text-slate-500 uppercase font-medium">
                 {results.userInfo?.age || 'N/A'} Yrs • {results.userInfo?.grade || 'Grade 10'}
               </p>
@@ -221,15 +220,13 @@ export default function ResultsPage() {
           </div>
         </section>
 
-        {/* --- NEW ZONE: VISUAL ANALYTICS --- */}
+        {/* --- VISUAL ANALYTICS --- */}
         <section className="px-8 mb-6 grid grid-cols-1 md:grid-cols-2 gap-6 print:hidden">
           <Card className="border-slate-100 shadow-sm">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" />
-                <CardTitle className="text-xs font-bold uppercase tracking-wider">Score Distribution</CardTitle>
-              </div>
-            </CardHeader>
+            <div className="p-4 flex items-center gap-2 border-b">
+              <BarChart3 className="h-4 w-4 text-primary" />
+              <h4 className="text-xs font-bold uppercase tracking-wider">Score Distribution</h4>
+            </div>
             <CardContent className="h-[200px] pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
@@ -251,12 +248,10 @@ export default function ResultsPage() {
           </Card>
 
           <Card className="border-slate-100 shadow-sm">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <PieChartIcon className="h-4 w-4 text-primary" />
-                <CardTitle className="text-xs font-bold uppercase tracking-wider">Strength Composition</CardTitle>
-              </div>
-            </CardHeader>
+            <div className="p-4 flex items-center gap-2 border-b">
+              <PieChartIcon className="h-4 w-4 text-primary" />
+              <h4 className="text-xs font-bold uppercase tracking-wider">Strength Composition</h4>
+            </div>
             <CardContent className="h-[200px] pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -381,7 +376,7 @@ export default function ResultsPage() {
         <footer className="bg-[#4338ca] text-white p-4 mt-auto">
           <div className="text-center">
             <p className="text-[9px] font-bold opacity-90 mb-0.5">
-              CareerCompass Kenya | Designed by Sidmadina Techgroup
+              CareerCompass Kenya | Designed by Sidmadina Technologies
             </p>
             <p className="text-[8px] opacity-60 uppercase tracking-tighter">
               Kenya's Competency-Based Education (CBE) System Alignment

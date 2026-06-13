@@ -45,4 +45,4 @@ CareerCompass Kenya is a high-fidelity career guidance platform custom-built for
 - **Terminology**: Uses official MoE/KICD naming (e.g., "Core/Essential Mathematics", "Community Service Learning").
 
 ---
-Designed by Sidmadina Techgroup.
+Designed by Sidmadina Technologies.

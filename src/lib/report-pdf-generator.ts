@@ -232,7 +232,7 @@ export async function generateCareerBlueprintPDF(data: PDFReportData) {
   doc.rect(0, 282, pageWidth, 15, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(7);
-  doc.text(`CareerCompass Kenya | Designed by Sidmadina Techgroup`, pageWidth / 2, 289, { align: 'center' });
+  doc.text(`CareerCompass Kenya | Designed by Sidmadina Technologies`, pageWidth / 2, 289, { align: 'center' });
   doc.setFontSize(6);
   doc.setTextColor(255, 255, 255, 0.6);
   doc.text(`Kenya's Competency-Based Education (CBE) System Alignment`, pageWidth / 2, 293, { align: 'center' });
