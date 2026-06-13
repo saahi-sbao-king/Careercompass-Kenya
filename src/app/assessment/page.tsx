@@ -37,8 +37,15 @@ export default function AssessmentPage() {
         const data = JSON.parse(saved);
         setAnswers(data.answers || {});
         setCurrentQuestionIdx(data.idx || 0);
-        setUserInfo(data.userInfo || { name: '', age: '', school: '', grade: '', phone: '' });
-        setStep(data.step || 0);
+        const info = data.userInfo || { name: '', age: '', school: '', grade: '', phone: '' };
+        setUserInfo(info);
+        
+        // If name exists, skip the info hub for immediate entry
+        if (info.name && info.name.length > 2) {
+          setStep(1);
+        } else {
+          setStep(data.step || 0);
+        }
       } catch (e) { console.error(e); }
     }
     setIsHydrated(true);
@@ -64,6 +71,7 @@ export default function AssessmentPage() {
   const calculateResults = async () => {
     if (!guestId || !db) return;
     setIsSaving(true);
+    
     const intelligenceScores: Record<string, number> = {};
     MI_QUESTIONS.forEach(q => {
       const score = answers[q.id] || 0;
@@ -82,8 +90,12 @@ export default function AssessmentPage() {
       completedAt: new Date().toISOString()
     };
 
+    // Store in localStorage for instant results page loading
+    localStorage.setItem('temp-assessment-results', JSON.stringify(resultData));
+
     try {
-      await setDoc(doc(db, 'users', guestId), { 
+      // Fire and forget the Firestore update to allow immediate transition
+      setDoc(doc(db, 'users', guestId), { 
         assessment: resultData, 
         id: guestId, 
         username: userInfo.name,
@@ -92,15 +104,17 @@ export default function AssessmentPage() {
       
       localStorage.removeItem('mi-assessment-progress');
       toast({ title: "Analysis Complete", description: "Your professional blueprint is ready." });
-      router.push('/dashboard');
+      router.push('/assessment/results');
     } catch (err) { 
-      toast({ title: "Save Error", variant: "destructive" }); 
+      // Redirect anyway since we saved to localStorage
+      router.push('/assessment/results');
     } finally { 
       setIsSaving(false); 
     }
   };
 
-  if (!isHydrated) return <div className="p-24 text-center"><Loader2 className="animate-spin h-12 w-12 text-primary mx-auto" /></div>;
+  // Minimal hydration screen to prevent flash
+  if (!isHydrated) return null;
 
   if (step === 0) {
     return (

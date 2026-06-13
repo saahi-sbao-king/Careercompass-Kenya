@@ -4,65 +4,57 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a guest student profile managed via localStorage ID.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the guest (stored in localStorage)."
-        },
-        "username": {
-          "type": "string",
-          "description": "The name of the student."
-        },
-        "role": {
-          "type": "string",
-          "description": "The role of the user (defaults to Student)."
-        },
-        "assessment": {
-          "type": "object",
-          "description": "The high-fidelity results of the career evaluation including intelligence scores and recommended pathway."
-        }
-      }
-    },
-    "FeatureFlag": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "FeatureFlag",
-      "type": "object",
-      "description": "Represents dynamic system configurations.",
+      "description": "Represents a student profile with authentication and assessment data.",
       "properties": {
         "id": { "type": "string" },
-        "isEnabled": { "type": "boolean" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        "email": { "type": "string", "format": "email" },
+        "username": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "teacher"] },
+        "photoURL": { "type": "string" },
+        "hashedPassword": { "type": "string" },
+        "assessment": {
+          "type": "object",
+          "description": "Results of the Multiple Intelligence evaluation."
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastActive": { "type": "string", "format": "date-time" }
+      }
+    },
+    "StudyLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "StudyLog",
+      "type": "object",
+      "properties": {
+        "subject": { "type": "string" },
+        "duration": { "type": "number" },
+        "date": { "type": "string" },
+        "guestId": { "type": "string" }
       }
     }
   },
   "auth": {
-    "providers": ["google"],
-    "reasoning": "Auth.js (NextAuth v5) integrated for dashboard protection and student data synchronization."
+    "providers": ["google", "credentials"],
+    "reasoning": "Auth.js v5 providing Google and Email/Password access for students of Frere Town Secondary."
   },
   "firestore": {
     "structure": [
       {
-        "path": "/users/{guestId}",
+        "path": "/users/{userId}",
         "definition": {
           "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores guest profile and assessment data."
+          "schema": { "$ref": "#/backend/entities/User" },
+          "description": "Core student profile and career data."
         }
       },
       {
-        "path": "/feature_flags/{flagId}",
+        "path": "/users/{userId}/studyLogs/{logId}",
         "definition": {
-          "entityName": "FeatureFlag",
-          "schema": {
-            "$ref": "#/backend/entities/FeatureFlag"
-          },
-          "description": "Public configuration for system behaviors."
+          "entityName": "StudyLog",
+          "schema": { "$ref": "#/backend/entities/StudyLog" },
+          "description": "Daily academic effort logs."
         }
       }
     ],
-    "reasoning": "All assessment paths are publicly accessible to empower Frere Town students with free guidance. Admin paths are secured via device-level token verification."
+    "reasoning": "Fully permissive rules applied to support public service model and legacy guest continuity."
   }
 }
