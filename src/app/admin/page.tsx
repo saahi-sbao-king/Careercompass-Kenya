@@ -25,7 +25,7 @@ export default function AdminDashboard() {
     const intelligenceDistribution = users.reduce((acc: any, u) => {
       if (u.assessment?.scores) {
         Object.keys(u.assessment.scores).forEach(type => { 
-          acc[type] = (acc[type] || 0) + (u.assessment.scores[type] > 60 ? 1 : 0); 
+          acc[type] = (acc[type] || 0) + (u.assessment.scores[type] > 15 ? 1 : 0); 
         });
       }
       return acc;
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
           <Card className="border-none shadow-2xl rounded-[3rem] p-10 bg-card">
             <CardHeader className="px-0 pt-0 pb-10">
               <CardTitle className="text-3xl font-black">Intelligence Distribution</CardTitle>
-              <CardDescription className="font-medium">Number of students scoring highly (>60%) in each modality.</CardDescription>
+              <CardDescription className="font-medium">Number of students scoring highly in each modality.</CardDescription>
             </CardHeader>
             <CardContent className="h-[500px] p-0">
               {isMounted && stats.chartData.length > 0 ? (
