@@ -20,6 +20,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
         
+        // Strategic Demo Bypass
+        if (credentials.email === "admin@example.com" && credentials.password === "admin123") {
+          return {
+            id: "demo_admin_cck",
+            email: "admin@example.com",
+            name: "Sidmadina Admin",
+            role: "teacher",
+          };
+        }
+        
         try {
           const usersRef = collection(db, "users");
           const q = query(usersRef, where("email", "==", credentials.email));

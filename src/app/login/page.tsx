@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Compass, ShieldCheck, LogIn, Loader2 } from "lucide-react";
+import { Compass, ShieldCheck, LogIn, Loader2, Info } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -30,6 +30,7 @@ export default function LoginPage() {
       if (result?.error) {
         toast({ title: "Login failed", description: "Invalid email or password.", variant: "destructive" });
       } else {
+        toast({ title: "Welcome back!", description: "Success. Accessing your roadmap." });
         router.push("/dashboard");
         router.refresh();
       }
@@ -59,7 +60,7 @@ export default function LoginPage() {
               <Input 
                 id="email" 
                 type="email" 
-                placeholder="m@example.com" 
+                placeholder="admin@example.com" 
                 required 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)}
@@ -78,6 +79,7 @@ export default function LoginPage() {
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-12 rounded-xl"
+                placeholder="admin123"
               />
             </div>
             <Button 
@@ -89,6 +91,14 @@ export default function LoginPage() {
               Login
             </Button>
           </form>
+
+          <div className="p-4 bg-muted/50 rounded-2xl border border-dashed flex items-start gap-3">
+            <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-xs font-black uppercase text-primary tracking-widest">Demo Account Access</p>
+              <p className="text-[10px] text-muted-foreground font-medium">Use <b>admin@example.com</b> / <b>admin123</b> to evaluate the platform instantly.</p>
+            </div>
+          </div>
 
           <div className="relative flex items-center py-2">
             <div className="flex-grow border-t border-muted"></div>

@@ -16,7 +16,8 @@ import {
   Zap,
   Target,
   History,
-  Compass
+  Compass,
+  LayoutDashboard
 } from 'lucide-react';
 import { useGuestUser } from '@/lib/firebase/hooks';
 import { 
@@ -135,8 +136,8 @@ export default function ResultsPage() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8 flex flex-col items-center">
       <div className="w-full max-w-5xl mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 print:hidden">
-        <Button variant="ghost" onClick={() => router.push('/dashboard')} className="gap-2 text-slate-500 font-bold hover:text-primary">
-          <ArrowLeft className="h-4 w-4" /> Command Center
+        <Button variant="ghost" onClick={() => router.push('/dashboard')} className="gap-2 text-primary font-black hover:bg-primary/5">
+          <LayoutDashboard className="h-4 w-4" /> Go to Dashboard
         </Button>
         <div className="flex gap-3">
           <Button variant="outline" onClick={handleDownload} disabled={isGenerating} className="h-12 px-6 rounded-xl font-black border-primary/20 bg-white gap-2">
@@ -277,55 +278,21 @@ export default function ResultsPage() {
             </div>
           </section>
 
-          <div className="grid md:grid-cols-2 gap-10">
-            <Card className="rounded-[3rem] border-none shadow-2xl bg-primary text-white p-12 overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-8 opacity-10"><Target size={120} /></div>
-              <h3 className="text-3xl font-black mb-8">Career Clusters</h3>
-              <div className="grid gap-3">
-                {careerClusters.map(c => (
-                  <div key={c} className="p-4 bg-white/10 rounded-2xl border border-white/10 font-bold flex items-center gap-3 text-sm">
-                    <div className="h-2 w-2 rounded-full bg-secondary shadow-2xl" /> {c}
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="rounded-[3rem] border-none shadow-2xl bg-white p-12 overflow-hidden border">
-               <h3 className="text-3xl font-black mb-8 text-primary">Learning DNA</h3>
-               <div className="space-y-6">
-                  {dataAnalysis.topThree.map(([name]: any) => (
-                    <div key={name} className="p-6 bg-muted/30 rounded-2xl space-y-2">
-                       <h4 className="text-[10px] font-black uppercase text-primary tracking-widest">{name} Learning Style</h4>
-                       <p className="text-sm font-bold text-slate-700">{INTEL_DESCRIPTIONS[name as IntelligenceType].styles[0]}</p>
-                    </div>
-                  ))}
-                  <div className="pt-6 border-t">
-                    <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-4">Development Areas</h4>
-                    <div className="space-y-3">
-                       {dataAnalysis.development.map(([name, score]: any) => (
-                         <div key={name} className="flex justify-between items-center text-sm font-bold">
-                            <span className="text-slate-600">{name}</span>
-                            <Badge variant="outline" className="text-[10px] opacity-70">Focus Required</Badge>
-                         </div>
-                       ))}
-                    </div>
-                  </div>
-               </div>
-            </Card>
-          </div>
-
-          <section className="bg-secondary text-white p-10 md:p-16 rounded-[4rem] text-center space-y-8 relative overflow-hidden shadow-2xl">
+          <section className="bg-primary text-white p-10 md:p-16 rounded-[4rem] text-center space-y-8 relative overflow-hidden shadow-2xl">
              <div className="absolute inset-0 opacity-10 pointer-events-none">
                 <Compass className="h-[600px] w-[600px] -bottom-40 -left-40 absolute" />
              </div>
-             <h3 className="text-3xl md:text-4xl font-black">Strategic Guidance Summary</h3>
+             <h3 className="text-3xl md:text-4xl font-black">Roadmap Finalized</h3>
              <p className="text-lg md:text-xl font-medium max-w-3xl mx-auto opacity-90">
-               Your intelligence profile indicates strong potential in <span className="font-black underline">{dataAnalysis.topThree[0][0]}</span> and <span className="font-black underline">{dataAnalysis.topThree[1][0]}</span>. 
-               We recommend focusing on the <span className="bg-white/20 px-2 rounded">{results.pathway}</span> pathway for Senior School specialization.
+               Your blueprint is complete. Visit your command center to start managing your study efforts and tracking professional growth.
              </p>
              <div className="flex flex-wrap justify-center gap-4 pt-4">
-                <Button onClick={() => router.push('/subject-combination')} variant="secondary" className="rounded-2xl h-16 px-10 text-lg font-black bg-white text-secondary hover:bg-white/90">Analyze Subject Mix</Button>
-                <Button onClick={() => router.push('/exploration')} variant="ghost" className="rounded-2xl h-16 px-10 text-lg font-black text-white hover:bg-white/10">Explore Careers</Button>
+                <Button onClick={() => router.push('/dashboard')} size="lg" className="rounded-2xl h-20 px-16 text-xl font-black bg-white text-primary hover:bg-white/90 shadow-2xl gap-3">
+                  <LayoutDashboard size={24} /> Open My Dashboard
+                </Button>
+                <Button onClick={() => router.push('/subject-combination')} variant="outline" className="rounded-2xl h-20 px-10 text-xl font-black text-white border-white/20 hover:bg-white/10">
+                  Analyze Subject Mix
+                </Button>
              </div>
           </section>
 
@@ -333,7 +300,7 @@ export default function ResultsPage() {
             <h3 className="text-2xl font-black flex items-center gap-3"><History className="text-secondary" /> Strategic Next Steps</h3>
             <div className="grid md:grid-cols-2 gap-8">
               {[
-                "Complete the Passion, Interest and Abilities Assessment on the Exploration page.",
+                "Open your Dashboard to record study hours and intensity.",
                 "Explore recommended career pathways aligned with your pathway.",
                 "Research relevant university, college and TVET programmes in Kenya.",
                 "Consult a teacher, parent or career counselor for further guidance."
