@@ -16,7 +16,10 @@ import { toast } from '@/hooks/use-toast';
 import { 
   UserCircle, 
   Loader2,
-  Brain
+  Brain,
+  ChevronRight,
+  ChevronLeft,
+  Target
 } from 'lucide-react';
 
 export default function AssessmentPage() {
@@ -39,12 +42,8 @@ export default function AssessmentPage() {
         setCurrentQuestionIdx(data.idx || 0);
         const info = data.userInfo || { name: '', age: '', school: '', grade: '', phone: '' };
         setUserInfo(info);
-        
-        // Immediate entry if info exists
         if (info.name && info.name.length > 2) {
           setStep(1);
-        } else {
-          setStep(data.step || 0);
         }
       } catch (e) { console.error(e); }
     }
@@ -78,14 +77,9 @@ export default function AssessmentPage() {
       intelligenceScores[q.type] = (intelligenceScores[q.type] || 0) + score;
     });
 
-    const finalScores: Record<string, number> = {};
-    Object.keys(intelligenceScores).forEach(type => { 
-      finalScores[type] = (intelligenceScores[type] / 25) * 100; 
-    });
-
     const resultData = {
-      pathway: calculatePathway(finalScores),
-      scores: finalScores,
+      pathway: calculatePathway(intelligenceScores),
+      scores: intelligenceScores,
       userInfo,
       completedAt: new Date().toISOString()
     };
@@ -93,7 +87,6 @@ export default function AssessmentPage() {
     localStorage.setItem('temp-assessment-results', JSON.stringify(resultData));
 
     try {
-      // Background save to Firestore
       setDoc(doc(db, 'users', guestId), { 
         assessment: resultData, 
         id: guestId, 
@@ -102,7 +95,7 @@ export default function AssessmentPage() {
       }, { merge: true });
       
       localStorage.removeItem('mi-assessment-progress');
-      toast({ title: "Analysis Complete", description: "Your professional blueprint is ready." });
+      toast({ title: "Blueprint Finalized", description: "Your professional roadmap is ready." });
       router.push('/assessment/results');
     } catch (err) { 
       router.push('/assessment/results');
@@ -115,39 +108,41 @@ export default function AssessmentPage() {
 
   if (step === 0) {
     return (
-      <div className="container max-w-xl mx-auto py-12 px-4">
-        <Card className="border-primary/20 shadow-2xl bg-card overflow-hidden rounded-[2.5rem]">
-          <CardHeader className="text-center bg-primary/5 pb-8 border-b">
-            <UserCircle className="h-12 w-12 text-primary mx-auto mb-4" />
-            <CardTitle className="text-2xl font-black">Information Hub</CardTitle>
-            <CardDescription>Enter your details to start the assessment. No account required.</CardDescription>
+      <div className="container max-w-2xl mx-auto py-12 px-4">
+        <Card className="border-primary/20 shadow-2xl bg-card overflow-hidden rounded-[3rem]">
+          <CardHeader className="text-center bg-primary text-white p-12">
+            <div className="mx-auto w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center mb-6 shadow-2xl backdrop-blur-xl">
+              <UserCircle className="h-10 w-10 text-white" />
+            </div>
+            <CardTitle className="text-4xl font-black tracking-tighter">Information Hub</CardTitle>
+            <CardDescription className="text-blue-100 font-medium">Verify your strategic details to begin the assessment.</CardDescription>
           </CardHeader>
-          <CardContent className="pt-8">
+          <CardContent className="p-12 space-y-8">
             <form onSubmit={handleUserInfoSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label>Full Name</Label>
-                <Input required value={userInfo.name} onChange={e => setUserInfo(prev => ({ ...prev, name: e.target.value }))} className="h-14 rounded-2xl" placeholder="e.g. Sadiq Sbao" />
-              </div>
-              <div className="space-y-2">
-                <Label>Phone Number</Label>
-                <Input required value={userInfo.phone} onChange={e => setUserInfo(prev => ({ ...prev, phone: e.target.value }))} className="h-14 rounded-2xl" placeholder="+254..." />
+                <Label className="text-[10px] font-black uppercase tracking-widest text-primary/60">Full Name</Label>
+                <Input required value={userInfo.name} onChange={e => setUserInfo(prev => ({ ...prev, name: e.target.value }))} className="h-14 rounded-2xl text-lg font-bold" placeholder="e.g. Sadiq Sbao" />
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Age</Label>
-                  <Input required type="number" value={userInfo.age} onChange={e => setUserInfo(prev => ({ ...prev, age: e.target.value }))} className="h-14 rounded-2xl" />
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-primary/60">Age</Label>
+                  <Input required type="number" value={userInfo.age} onChange={e => setUserInfo(prev => ({ ...prev, age: e.target.value }))} className="h-14 rounded-2xl text-lg font-bold" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Grade / Level</Label>
-                  <Input required value={userInfo.grade} onChange={e => setUserInfo(prev => ({ ...prev, grade: e.target.value }))} className="h-14 rounded-2xl" placeholder="Grade 10" />
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-primary/60">Grade / Level</Label>
+                  <Input required value={userInfo.grade} onChange={e => setUserInfo(prev => ({ ...prev, grade: e.target.value }))} className="h-14 rounded-2xl text-lg font-bold" placeholder="Grade 10" />
                 </div>
               </div>
-              <Button type="submit" className="w-full h-16 text-xl font-black rounded-[1.5rem] shadow-xl">
-                Start Questionnaire
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-primary/60">Institution</Label>
+                <Input required value={userInfo.school} onChange={e => setUserInfo(prev => ({ ...prev, school: e.target.value }))} className="h-14 rounded-2xl text-lg font-bold" placeholder="Frere Town Secondary" />
+              </div>
+              <Button type="submit" className="w-full h-20 text-2xl font-black rounded-[2rem] shadow-2xl mt-4">
+                Launch Assessment <ChevronRight className="ml-2" />
               </Button>
-              <p className="text-[10px] text-center text-muted-foreground uppercase font-bold tracking-widest pt-4">
-                Designed by Sidmadina Technologies
-              </p>
+              <div className="p-4 bg-muted/30 rounded-2xl border border-dashed text-center">
+                 <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em]">Strategic Partner: Sidmadina Technologies</p>
+              </div>
             </form>
           </CardContent>
         </Card>
@@ -159,76 +154,91 @@ export default function AssessmentPage() {
   const progressPercent = ((currentQuestionIdx + 1) / MI_QUESTIONS.length) * 100;
 
   return (
-    <div className="container max-w-2xl mx-auto py-12 px-4">
-      <div className="flex items-center justify-between mb-4 px-2">
-        <div className="flex items-center gap-2">
-          <Brain className="h-5 w-5 text-primary" />
-          <span className="text-xs font-black uppercase tracking-widest text-primary">Intelligence Analysis</span>
+    <div className="container max-w-3xl mx-auto py-12 px-4 space-y-8">
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary text-white rounded-lg shadow-lg"><Brain size={18} /></div>
+          <div>
+            <span className="text-xs font-black uppercase tracking-widest text-primary">Modality Analysis</span>
+            <p className="text-[10px] text-muted-foreground font-bold">{currentQuestion.type} Intelligence</p>
+          </div>
         </div>
-        <span className="text-xs font-bold text-muted-foreground">{currentQuestionIdx + 1} / {MI_QUESTIONS.length}</span>
+        <div className="text-right">
+           <span className="text-xs font-black text-primary">{Math.round(progressPercent)}%</span>
+           <p className="text-[10px] font-bold text-muted-foreground">{currentQuestionIdx + 1} of 45</p>
+        </div>
       </div>
-      <Progress value={progressPercent} className="h-2 mb-10" />
+      <Progress value={progressPercent} className="h-2 rounded-full bg-primary/10" />
       
-      <Card className="min-h-[550px] flex flex-col justify-between rounded-[3rem] overflow-hidden shadow-2xl border-primary/10">
-        <CardHeader className="bg-primary text-white pb-12 px-10 pt-10">
-          <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest w-fit mb-4 block">
-            {currentQuestion.type}
+      <Card className="min-h-[600px] flex flex-col justify-between rounded-[4rem] overflow-hidden shadow-2xl border-primary/5">
+        <CardHeader className="bg-primary text-white p-16 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-12 opacity-10"><Target size={160} /></div>
+          <span className="px-4 py-1.5 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest w-fit mb-6 block backdrop-blur-xl">
+             Focus Area: {currentQuestion.type}
           </span>
-          <CardTitle className="text-2xl md:text-3xl font-black leading-tight">
+          <CardTitle className="text-3xl md:text-4xl font-black leading-tight tracking-tighter">
             {currentQuestion.text}
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="py-12 px-10">
+        <CardContent className="p-16">
           <RadioGroup value={answers[currentQuestion.id]?.toString()} onValueChange={handleAnswerChange} className="grid gap-4">
-            {[1, 2, 3, 4, 5].map(v => (
+            {[5, 4, 3, 2, 1].map(v => (
               <div 
                 key={v} 
                 onClick={() => handleAnswerChange(v.toString())} 
-                className={`flex items-center space-x-4 p-5 border-2 rounded-2xl cursor-pointer transition-all ${
+                className={`flex items-center space-x-4 p-6 border-2 rounded-3xl cursor-pointer transition-all ${
                   answers[currentQuestion.id] === v 
-                    ? 'border-primary bg-primary/5 shadow-md scale-[1.02]' 
-                    : 'border-muted hover:border-primary/20 hover:bg-muted/50'
+                    ? 'border-primary bg-primary/5 shadow-xl scale-[1.03]' 
+                    : 'border-transparent bg-muted/30 hover:bg-muted/50'
                 }`}
               >
                 <RadioGroupItem value={v.toString()} id={`v-${v}`} />
-                <Label htmlFor={`v-${v}`} className="flex-1 font-black text-lg cursor-pointer">
-                  {["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"][v-1]}
+                <Label htmlFor={`v-${v}`} className="flex-1 font-black text-xl cursor-pointer">
+                  {v === 5 && "Strongly Agree"}
+                  {v === 4 && "Agree"}
+                  {v === 3 && "Neutral"}
+                  {v === 2 && "Disagree"}
+                  {v === 1 && "Strongly Disagree"}
                 </Label>
               </div>
             ))}
           </RadioGroup>
         </CardContent>
         
-        <CardFooter className="flex justify-between border-t p-10 bg-muted/20">
+        <CardFooter className="flex justify-between p-16 pt-0">
           <Button 
             variant="ghost" 
             onClick={() => setCurrentQuestionIdx(i => i - 1)} 
             disabled={currentQuestionIdx === 0}
-            className="font-bold"
+            className="h-14 px-8 rounded-xl font-black gap-2"
           >
-            Previous
+            <ChevronLeft /> Previous
           </Button>
           
           {currentQuestionIdx === MI_QUESTIONS.length - 1 ? (
             <Button 
               onClick={calculateResults} 
               disabled={!answers[currentQuestion.id] || isSaving} 
-              className="px-10 h-14 rounded-2xl font-black shadow-xl"
+              className="h-16 px-12 rounded-2xl font-black shadow-2xl text-xl"
             >
-              {isSaving ? <Loader2 className="animate-spin" /> : "Finalize Blueprint"}
+              {isSaving ? <Loader2 className="animate-spin" /> : "Finalize Roadmap"}
             </Button>
           ) : (
             <Button 
               onClick={() => setCurrentQuestionIdx(i => i + 1)} 
               disabled={!answers[currentQuestion.id]} 
-              className="px-10 h-14 rounded-2xl font-black shadow-xl"
+              className="h-16 px-12 rounded-2xl font-black shadow-2xl text-xl"
             >
-              Next Question
+              Next Question <ChevronRight />
             </Button>
           )}
         </CardFooter>
       </Card>
+      
+      <p className="text-[10px] text-center text-muted-foreground font-black uppercase tracking-[0.3em]">
+         Strategic Career Intelligence Terminal v4.0.0
+      </p>
     </div>
   );
 }

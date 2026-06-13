@@ -1,12 +1,12 @@
 export type IntelligenceType =
   | 'Linguistic'
   | 'Logical-Math'
-  | 'Spatial'
+  | 'Visual-Spatial'
   | 'Bodily-Kinesthetic'
   | 'Musical'
   | 'Interpersonal'
   | 'Intrapersonal'
-  | 'Naturalist'
+  | 'Naturalistic'
   | 'Existential';
 
 export interface Question {
@@ -16,169 +16,150 @@ export interface Question {
 }
 
 export const MI_QUESTIONS: Question[] = [
-  // Linguistic
-  { id: 1, text: "I learn new words quickly and naturally use them in speaking or writing.", type: "Linguistic" },
-  { id: 2, text: "I enjoy reading different types of materials for learning or pleasure.", type: "Linguistic" },
-  { id: 3, text: "I can explain complex ideas clearly to different types of people.", type: "Linguistic" },
-  { id: 4, text: "I enjoy activities that involve words, such as writing, storytelling, or word games.", type: "Linguistic" },
-  { id: 5, text: "Writing or speaking helps me remember and understand information better.", type: "Linguistic" },
-  // Logical-Math
-  { id: 6, text: "I enjoy solving problems that require logical thinking and reasoning.", type: "Logical-Math" },
-  { id: 7, text: "I am comfortable working with numbers, symbols, and abstract ideas.", type: "Logical-Math" },
-  { id: 8, text: "I naturally look for patterns and relationships between things.", type: "Logical-Math" },
-  { id: 9, text: "I break complex problems into smaller steps to solve them.", type: "Logical-Math" },
-  { id: 10, text: "I enjoy subjects or activities that involve analysis, calculation, or experimentation.", type: "Logical-Math" },
-  // Spatial
-  { id: 11, text: "I easily understand visual information such as maps, diagrams, and charts.", type: "Spatial" },
-  { id: 12, text: "I enjoy creating or working with visual designs, drawings, or models.", type: "Spatial" },
-  { id: 13, text: "I can imagine objects from different angles in my mind.", type: "Spatial" },
-  { id: 14, text: "I find it easy to navigate new places and understand directions.", type: "Spatial" },
-  { id: 15, text: "I prefer visual instructions over written explanations.", type: "Spatial" },
-  // Bodily-Kinesthetic
-  { id: 16, text: "I learn best through hands-on activities and physical involvement.", type: "Bodily-Kinesthetic" },
-  { id: 17, text: "I have good coordination and control of my body movements.", type: "Bodily-Kinesthetic" },
-  { id: 18, text: "I use body language and gestures naturally when communicating.", type: "Bodily-Kinesthetic" },
-  { id: 19, text: "I am skilled at working with tools, equipment, or small objects.", type: "Bodily-Kinesthetic" },
-  { id: 20, text: "I find it difficult to stay still for long periods without movement.", type: "Bodily-Kinesthetic" },
-  // Musical
-  { id: 21, text: "I easily remember melodies and song lyrics.", type: "Musical" },
-  { id: 22, text: "I am sensitive to rhythm, tone, and sound patterns.", type: "Musical" },
-  { id: 23, text: "I naturally hum, tap rhythms, or engage with music unconsciously.", type: "Musical" },
-  { id: 24, text: "I can recognize when sounds or music are out of tune.", type: "Musical" },
-  { id: 25, text: "Music strongly affects my emotions, focus, or energy levels.", type: "Musical" },
-  // Interpersonal
-  { id: 26, text: "People often come to me for advice or support.", type: "Interpersonal" },
-  { id: 27, text: "I easily understand other people’s emotions and intentions.", type: "Interpersonal" },
-  { id: 28, text: "I work well in teams and group settings.", type: "Interpersonal" },
-  { id: 29, text: "I feel comfortable starting conversations with new people.", type: "Interpersonal" },
-  { id: 30, text: "I actively build and maintain social relationships.", type: "Interpersonal" },
-  // Intrapersonal
-  { id: 31, text: "I regularly reflect on my thoughts, feelings, and goals.", type: "Intrapersonal" },
-  { id: 32, text: "I understand my strengths and weaknesses well.", type: "Intrapersonal" },
-  { id: 33, text: "I engage in self-reflection activities (journaling, meditation, self-analysis).", type: "Intrapersonal" },
-  { id: 34, text: "I manage my emotions well under stress or pressure.", type: "Intrapersonal" },
-  { id: 35, text: "I enjoy working independently and setting my own goals.", type: "Intrapersonal" },
-  // Naturalist
-  { id: 36, text: "I enjoy spending time in natural environments.", type: "Naturalist" },
-  { id: 37, text: "I can easily identify plants, animals, or natural features.", type: "Naturalist" },
-  { id: 38, text: "I notice changes in weather, seasons, and natural patterns.", type: "Naturalist" },
-  { id: 39, text: "I am interested in environmental, biological, or earth sciences.", type: "Naturalist" },
-  { id: 40, text: "I enjoy collecting, observing, or classifying natural objects.", type: "Naturalist" },
-  // Existential
-  { id: 41, text: "I often think about the meaning and purpose of life.", type: "Existential" },
-  { id: 42, text: "I am interested in philosophical or spiritual ideas.", type: "Existential" },
-  { id: 43, text: "I feel connected to something greater than myself.", type: "Existential" },
-  { id: 44, text: "I reflect on deep questions about existence and humanity.", type: "Existential" },
-  { id: 45, text: "I think about humanity’s place in the universe and the future of life.", type: "Existential" }
+  // Linguistic (Word Smart)
+  { id: 1, text: "I enjoy reading books, articles, or stories.", type: "Linguistic" },
+  { id: 2, text: "I find it easy to express my thoughts in writing.", type: "Linguistic" },
+  { id: 3, text: "I enjoy learning new words and their meanings.", type: "Linguistic" },
+  { id: 4, text: "I like telling stories or giving presentations.", type: "Linguistic" },
+  { id: 5, text: "I learn best through reading and discussion.", type: "Linguistic" },
+  // Logical-Math (Number Smart)
+  { id: 6, text: "I enjoy solving puzzles and brain teasers.", type: "Logical-Math" },
+  { id: 7, text: "I like working with numbers and calculations.", type: "Logical-Math" },
+  { id: 8, text: "I enjoy identifying patterns and relationships.", type: "Logical-Math" },
+  { id: 9, text: "I prefer logical explanations over guesses.", type: "Logical-Math" },
+  { id: 10, text: "I enjoy science and experimentation.", type: "Logical-Math" },
+  // Visual-Spatial (Picture Smart)
+  { id: 11, text: "I can easily visualize objects in my mind.", type: "Visual-Spatial" },
+  { id: 12, text: "I enjoy drawing, designing, or sketching.", type: "Visual-Spatial" },
+  { id: 13, text: "Maps and diagrams help me learn better.", type: "Visual-Spatial" },
+  { id: 14, text: "I notice details in images and surroundings.", type: "Visual-Spatial" },
+  { id: 15, text: "I enjoy photography, architecture, or graphic design.", type: "Visual-Spatial" },
+  // Bodily-Kinesthetic (Body Smart)
+  { id: 16, text: "I learn best by doing rather than reading.", type: "Bodily-Kinesthetic" },
+  { id: 17, text: "I enjoy sports and physical activities.", type: "Bodily-Kinesthetic" },
+  { id: 18, text: "I use gestures when communicating.", type: "Bodily-Kinesthetic" },
+  { id: 19, text: "I enjoy building or making things.", type: "Bodily-Kinesthetic" },
+  { id: 20, text: "I prefer hands-on learning experiences.", type: "Bodily-Kinesthetic" },
+  // Musical (Music Smart)
+  { id: 21, text: "I enjoy listening to music regularly.", type: "Musical" },
+  { id: 22, text: "I can easily recognize rhythms and melodies.", type: "Musical" },
+  { id: 23, text: "Music helps me concentrate or relax.", type: "Musical" },
+  { id: 24, text: "I enjoy singing, playing instruments, or composing music.", type: "Musical" },
+  { id: 25, text: "I often remember information through songs.", type: "Musical" },
+  // Interpersonal (People Smart)
+  { id: 26, text: "I enjoy working in teams.", type: "Interpersonal" },
+  { id: 27, text: "I can easily understand other people's feelings.", type: "Interpersonal" },
+  { id: 28, text: "Friends often seek my advice.", type: "Interpersonal" },
+  { id: 29, text: "I enjoy helping resolve conflicts.", type: "Interpersonal" },
+  { id: 30, text: "I communicate well with different types of people.", type: "Interpersonal" },
+  // Intrapersonal (Self Smart)
+  { id: 31, text: "I understand my strengths and weaknesses.", type: "Intrapersonal" },
+  { id: 32, text: "I enjoy setting personal goals.", type: "Intrapersonal" },
+  { id: 33, text: "I reflect on my experiences regularly.", type: "Intrapersonal" },
+  { id: 34, text: "I am comfortable working independently.", type: "Intrapersonal" },
+  { id: 35, text: "I understand my emotions well.", type: "Intrapersonal" },
+  // Naturalistic (Nature Smart)
+  { id: 36, text: "I enjoy spending time outdoors.", type: "Naturalistic" },
+  { id: 37, text: "I am interested in plants, animals, or the environment.", type: "Naturalistic" },
+  { id: 38, text: "I can easily identify different species or natural features.", type: "Naturalistic" },
+  { id: 39, text: "I care deeply about environmental conservation.", type: "Naturalistic" },
+  { id: 40, text: "Nature helps me feel energized and inspired.", type: "Naturalistic" },
+  // Existential (Life Smart)
+  { id: 41, text: "I often think about the meaning of life.", type: "Existential" },
+  { id: 42, text: "I enjoy discussing philosophical questions.", type: "Existential" },
+  { id: 43, text: "I am curious about different cultures and beliefs.", type: "Existential" },
+  { id: 44, text: "I think about humanity's future and purpose.", type: "Existential" },
+  { id: 45, text: "I enjoy exploring deep and complex ideas.", type: "Existential" }
 ];
 
-export const PASSION_LIST: Record<IntelligenceType, string[]> = {
-  Linguistic: ["Creative Writing", "Public Speaking", "Poetry", "Debate", "Storytelling", "Journalism", "Blogging", "Language Learning"],
-  'Logical-Math': ["Coding", "Robotics", "AI Research", "Scientific Discovery", "Core/Essential Mathematics", "Problem Solving", "Strategy Games"],
-  Spatial: ["Photography", "Architecture", "Graphic Design", "3D Animation", "Art Direction", "Interior Design", "Navigation"],
-  'Bodily-Kinesthetic': ["Athletics", "Football", "Dance", "Culinary Arts", "Mechanics", "Surgery", "Martial Arts", "Crafting"],
-  Musical: ["Music Production", "Singing", "Instrumental Performance", "Sound Engineering", "DJing", "Composition"],
-  Interpersonal: ["Leadership", "Community Service", "Mentorship", "Diplomacy", "Psychology", "Politics", "Event Planning"],
-  Intrapersonal: ["Self-Development", "Journaling", "Meditation", "Philosophy", "Goal Setting", "Spiritual Growth", "Solitary Research"],
-  Naturalist: ["Environmental Conservation", "Wildlife Protection", "Agribusiness", "Marine Biology", "Farming", "Renewable Energy"],
-  Existential: ["Human Rights Advocacy", "Theology", "Historical Research", "Space Exploration", "Cosmology", "Global Ethics"]
+export const INTEL_DESCRIPTIONS: Record<IntelligenceType, { desc: string; strengths: string[]; careers: string[]; styles: string[]; strategies: string[]; growth: string[] }> = {
+  Linguistic: {
+    desc: "This intelligence represents your strongest area of natural ability and learning preference.",
+    strengths: ["Reading and Writing", "Public Speaking", "Persuasion", "Storytelling", "Editing"],
+    careers: ["Journalist", "Lawyer", "Author", "Teacher", "Public Relations Specialist"],
+    styles: ["Reading books/articles", "Engaging in debates", "Writing journals"],
+    strategies: ["Use acronyms", "Read notes aloud", "Write summaries"],
+    growth: ["Join a debate club", "Practice creative writing"]
+  },
+  'Logical-Math': {
+    desc: "You possess a high capacity for analyzing problems logically and scientific investigation.",
+    strengths: ["Problem Solving", "Mathematical Logic", "Pattern Recognition", "Abstract Reasoning"],
+    careers: ["Scientist", "Engineer", "Data Analyst", "Accountant", "Computer Programmer"],
+    styles: ["Categorizing information", "Solving puzzles", "Scientific experiments"],
+    strategies: ["Create outlines", "Use logic maps", "Break tasks into steps"],
+    growth: ["Practice mental math", "Play strategy games"]
+  },
+  'Visual-Spatial': {
+    desc: "You have a keen ability to perceive and transform visual information into mental models.",
+    strengths: ["Mental Mapping", "Graphic Design", "3D Visualization", "Artistic Creation"],
+    careers: ["Architect", "Pilot", "Artist", "Civil Engineer", "Graphic Designer"],
+    styles: ["Using mind maps", "Visualizing concepts", "Drawing diagrams"],
+    strategies: ["Color code notes", "Use icons/symbols", "Watch video tutorials"],
+    growth: ["Learn 3D modeling", "Practice navigation without GPS"]
+  },
+  'Bodily-Kinesthetic': {
+    desc: "You learn and express yourself best through physical movement and hands-on interaction.",
+    strengths: ["Manual Dexterity", "Physical Coordination", "Tactile Learning", "Athleticism"],
+    careers: ["Surgeon", "Athlete", "Mechanic", "Dancer", "Craftsperson"],
+    styles: ["Hands-on projects", "Physical activity", "Building models"],
+    strategies: ["Study while standing", "Use physical flashcards", "Take frequent movement breaks"],
+    growth: ["Join a sports team", "Learn a new physical skill or craft"]
+  },
+  Musical: {
+    desc: "You have a natural sensitivity to rhythm, melody, and the structure of sound.",
+    strengths: ["Rhythmic Sensitivity", "Auditory Memory", "Musical Composition", "Aural Patterning"],
+    careers: ["Musician", "Sound Engineer", "Music Producer", "Composer", "Speech Therapist"],
+    styles: ["Listening to music", "Creating melodies", "Rhythmic patterns"],
+    strategies: ["Set notes to music", "Use background music", "Listen to educational podcasts"],
+    growth: ["Learn an instrument", "Practice active listening"]
+  },
+  Interpersonal: {
+    desc: "You are exceptionally skilled at understanding and interacting with others.",
+    strengths: ["Empathy", "Team Leadership", "Conflict Resolution", "Social Networking"],
+    careers: ["Psychologist", "Manager", "Politician", "Social Worker", "Marketing Executive"],
+    styles: ["Group discussions", "Team projects", "Mentoring others"],
+    strategies: ["Study with a partner", "Discuss topics with friends", "Teach what you learn"],
+    growth: ["Volunteer in leadership", "Practice active empathy"]
+  },
+  Intrapersonal: {
+    desc: "You possess deep self-awareness and the ability to act on self-reflection.",
+    strengths: ["Self-Reflection", "Goal Setting", "Metacognition", "Emotional Regulation"],
+    careers: ["Strategist", "Philosopher", "Entrepreneur", "Counselor", "Researcher"],
+    styles: ["Independent study", "Self-reflection", "Setting personal goals"],
+    strategies: ["Reflect on progress", "Connect learning to personal life", "Set clear milestones"],
+    growth: ["Keep a daily journal", "Practice mindfulness/meditation"]
+  },
+  Naturalistic: {
+    desc: "You have a profound sensitivity to the natural world and its ecological systems.",
+    strengths: ["Nature Classification", "Environmental Observation", "Ecological Mapping"],
+    careers: ["Veterinarian", "Environmentalist", "Farmer", "Marine Biologist", "Chef"],
+    styles: ["Field trips", "Outdoor learning", "Environmental projects"],
+    strategies: ["Study in nature", "Use natural analogies", "Conduct experiments"],
+    growth: ["Start a garden", "Join a conservation group"]
+  },
+  Existential: {
+    desc: "You excel at conceptualizing deep questions about human existence and the universe.",
+    strengths: ["Deep Thinking", "Cultural Sensitivity", "Philosophical Inquiry", "Ethics"],
+    careers: ["Philosopher", "Historian", "Ethicist", "Theologian", "Humanitarian Leader"],
+    styles: ["Philosophical inquiry", "Exploring cultures", "Ethical debates"],
+    strategies: ["Look at the big picture", "Discuss ethical implications", "Research global trends"],
+    growth: ["Read diverse philosophies", "Engage in community dialogue"]
+  }
 };
 
-export const ABILITY_LIST: Record<IntelligenceType, string[]> = {
-  Linguistic: ["Communication", "Fluency", "Persuasion", "Editing", "Translation", "Exposition"],
-  'Logical-Math': ["Analysis", "Calculation", "Deduction", "Data Management", "Programming", "Critical Thinking"],
-  Spatial: ["Visualization", "Drafting", "Spatial Reasoning", "Layout Design", "Visualizing Patterns"],
-  'Bodily-Kinesthetic': ["Coordination", "Manual Dexterity", "Physical Endurance", "Handling Tools", "Agility"],
-  Musical: ["Rhythm Analysis", "Tone Sensitivity", "Auditory Memory", "Melody Composition"],
-  Interpersonal: ["Conflict Resolution", "Teamwork", "Empathy", "Networking", "Negotiation"],
-  Intrapersonal: ["Self-Discipline", "Metacognition", "Emotional Regulation", "Independence"],
-  Naturalist: ["Species Identification", "Ecological Awareness", "Scientific Observation", "Sustainable Planning"],
-  Existential: ["Abstract Thinking", "Ethical Reasoning", "Contextual Analysis", "Philosophical Inquiry"]
-};
-
-export const INTEREST_LIST: Record<IntelligenceType, string[]> = {
-  Linguistic: ["Literature Clubs", "TED Talks", "Reading", "Publishing", "Writing Workshops"],
-  'Logical-Math': ["Hackathons", "Chess", "Math Fairs", "Crypto Trends", "Innovation Labs"],
-  Spatial: ["Exhibitions", "Drones", "VR/AR", "Modern Architecture", "Sketching"],
-  'Bodily-Kinesthetic': ["Sports Tournaments", "DIY Projects", "Outdoor Activities", "Acting"],
-  Musical: ["Concerts", "Studios", "Instrument Tutorials", "Audio Gear"],
-  Interpersonal: ["Volunteerism", "Leadership Summits", "Social Networking", "Group Projects"],
-  Intrapersonal: ["Philosophy Books", "Journaling Apps", "Quiet Spaces", "Meditation Retreats"],
-  Naturalist: ["Wildlife Parks", "Sustainable Farming", "Botanical Gardens", "Climate Action"],
-  Existential: ["History Documentaries", "Ethics Forums", "Space Missions", "Humanitarian Aid"]
-};
-
-const SUBJECT_MAP: Record<IntelligenceType, Record<string, string>> = {
-  'Linguistic': { 'Social Sciences': 'Literature in English', 'STEM': 'Technical Writing', 'Arts & Sports Science': 'Theatre Scripting' },
-  'Logical-Math': { 'Social Sciences': 'Business Studies', 'STEM': 'Physics', 'Arts & Sports Science': 'Computer Science' },
-  'Spatial': { 'Social Sciences': 'Geography', 'STEM': 'Building Construction', 'Arts & Sports Science': 'Fine Arts' },
-  'Bodily-Kinesthetic': { 'Social Sciences': 'Physical Education', 'STEM': 'Agriculture', 'Arts & Sports Science': 'Sports Science' },
-  'Musical': { 'Social Sciences': 'Music Theory', 'STEM': 'Acoustic Engineering', 'Arts & Sports Science': 'Music and Dance' },
-  'Interpersonal': { 'Social Sciences': 'History & Citizenship', 'STEM': 'Agribusiness', 'Arts & Sports Science': 'Sports Management' },
-  'Intrapersonal': { 'Social Sciences': 'Religious Education', 'STEM': 'Scientific Ethics', 'Arts & Sports Science': 'Artistic Expression' },
-  'Naturalist': { 'Social Sciences': 'Geography', 'STEM': 'Biology', 'Arts & Sports Science': 'Marine Technology' },
-  'Existential': { 'Social Sciences': 'History and Citizenship', 'STEM': 'Ethics in Tech', 'Arts & Sports Science': 'Philosophy of Art' }
-};
-
-const CAREER_MAP: Record<IntelligenceType, string[]> = {
-  'Linguistic': ['Lawyer', 'Journalist', 'Author', 'Communications Expert'],
-  'Logical-Math': ['Software Engineer', 'Data Scientist', 'Accountant', 'Research Scientist'],
-  'Spatial': ['Architect', 'Pilot', 'Graphic Designer', 'Civil Engineer'],
-  'Bodily-Kinesthetic': ['Professional Athlete', 'Surgeon', 'Automotive Engineer', 'Choreographer'],
-  'Musical': ['Music Producer', 'Composer', 'Audio Engineer', 'Broadcaster'],
-  'Interpersonal': ['Counselor', 'International Diplomat', 'Marketing Executive', 'HR Manager'],
-  'Intrapersonal': ['Psychologist', 'Strategist', 'Entrepreneur', 'Life Coach'],
-  'Naturalist': ['Environmentalist', 'Veterinarian', 'Agricultural Scientist', 'Conservationist'],
-  'Existential': ['Philosopher', 'Historian', 'Ethicist', 'Humanitarian Leader']
-};
+export function getLevel(score: number): string {
+  if (score >= 21) return "Very Strong";
+  if (score >= 16) return "Strong";
+  if (score >= 11) return "Moderate";
+  return "Developing";
+}
 
 export function calculatePathway(scores: Record<string, number>) {
-  const stemScore = (scores['Logical-Math'] || 0) + (scores['Naturalist'] || 0) + (scores['Spatial'] || 0);
-  const artsScore = (scores['Bodily-Kinesthetic'] || 0) + (scores['Musical'] || 0) + (scores['Spatial'] || 0);
+  const stemScore = (scores['Logical-Math'] || 0) + (scores['Naturalistic'] || 0) + (scores['Visual-Spatial'] || 0);
+  const artsScore = (scores['Bodily-Kinesthetic'] || 0) + (scores['Musical'] || 0) + (scores['Visual-Spatial'] || 0);
   const socialScore = (scores['Interpersonal'] || 0) + (scores['Intrapersonal'] || 0) + (scores['Linguistic'] || 0) + (scores['Existential'] || 0);
   
   if (stemScore >= artsScore && stemScore >= socialScore) return 'STEM';
   if (artsScore >= stemScore && artsScore >= socialScore) return 'Arts & Sports Science';
   return 'Social Sciences';
-}
-
-export function getRecommendedSubjects(scores: Record<string, number>, pathway: string): string[] {
-  const topIntelligences = Object.entries(scores)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3)
-    .map(([type]) => type as IntelligenceType);
-    
-  const subjects = topIntelligences.map(type => 
-    SUBJECT_MAP[type]?.[pathway] || SUBJECT_MAP[type]?.['Social Sciences'] || 'General Studies'
-  );
-  return Array.from(new Set(subjects)); 
-}
-
-export function getRecommendedCareers(scores: Record<string, number>): string[] {
-  const topIntelligences = Object.entries(scores)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3)
-    .map(([type]) => type as IntelligenceType);
-  return topIntelligences.map(type => CAREER_MAP[type][0]);
-}
-
-export function getRecommendedPassions(scores: Record<string, number>): string[] {
-  const topIntelligences = Object.entries(scores).sort(([, a], [, b]) => b - a).slice(0, 3).map(([type]) => type as IntelligenceType);
-  const results: string[] = [];
-  topIntelligences.forEach(type => results.push(...(PASSION_LIST[type] || []).slice(0, 6)));
-  return Array.from(new Set(results));
-}
-
-export function getRecommendedAbilities(scores: Record<string, number>): string[] {
-  const topIntelligences = Object.entries(scores).sort(([, a], [, b]) => b - a).slice(0, 3).map(([type]) => type as IntelligenceType);
-  const results: string[] = [];
-  topIntelligences.forEach(type => results.push(...(ABILITY_LIST[type] || []).slice(0, 6)));
-  return Array.from(new Set(results));
-}
-
-export function getRecommendedInterests(scores: Record<string, number>): string[] {
-  const topIntelligences = Object.entries(scores).sort(([, a], [, b]) => b - a).slice(0, 3).map(([type]) => type as IntelligenceType);
-  const results: string[] = [];
-  topIntelligences.forEach(type => results.push(...(INTEREST_LIST[type] || []).slice(0, 6)));
-  return Array.from(new Set(results));
 }

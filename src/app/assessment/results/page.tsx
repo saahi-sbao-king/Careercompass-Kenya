@@ -14,15 +14,14 @@ import {
   Printer,
   Loader2,
   BarChart3,
-  PieChart as PieChartIcon
+  Lightbulb,
+  Zap,
+  Target
 } from 'lucide-react';
 import { useGuestUser } from '@/lib/firebase/hooks';
 import { 
-  getRecommendedPassions, 
-  getRecommendedAbilities, 
-  getRecommendedInterests,
-  getRecommendedCareers,
-  getRecommendedSubjects 
+  INTEL_DESCRIPTIONS,
+  getLevel 
 } from '@/lib/assessment-data';
 import { cn } from '@/lib/utils';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -35,18 +34,16 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer, 
-  Cell,
-  PieChart,
-  Pie
+  Cell
 } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const intelligenceMetadata: Record<string, { label: string; color: string; hex: string; bg: string }> = {
   "Linguistic": { label: "Linguistic", color: "bg-indigo-600", hex: "#4f46e5", bg: "bg-indigo-50" },
   "Logical-Math": { label: "Logical-Math", color: "bg-emerald-500", hex: "#10b981", bg: "bg-emerald-50" },
   "Musical": { label: "Musical", color: "bg-cyan-600", hex: "#0891b2", bg: "bg-cyan-50" },
-  "Naturalist": { label: "Naturalist", color: "bg-lime-600", hex: "#65a30d", bg: "bg-lime-50" },
-  "Spatial": { label: "Spatial", color: "bg-orange-500", hex: "#f97316", bg: "bg-orange-50" },
+  "Naturalistic": { label: "Naturalistic", color: "bg-lime-600", hex: "#65a30d", bg: "bg-lime-50" },
+  "Visual-Spatial": { label: "Visual-Spatial", color: "bg-orange-500", hex: "#f97316", bg: "bg-orange-50" },
   "Intrapersonal": { label: "Intrapersonal", color: "bg-slate-500", hex: "#64748b", bg: "bg-slate-50" },
   "Existential": { label: "Existential", color: "bg-purple-500", hex: "#a855f7", bg: "bg-purple-50" },
   "Interpersonal": { label: "Interpersonal", color: "bg-sky-500", hex: "#0ea5e9", bg: "bg-sky-50" },
@@ -86,7 +83,7 @@ export default function ResultsPage() {
         grade: results.userInfo?.grade || 'N/A',
         school: results.userInfo?.school || 'Frere Town Secondary School',
         pathway: results.pathway,
-        reportDate: results.completedAt ? new Date(results.completedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '10 March 2026',
+        reportDate: new Date().toLocaleDateString('en-KE', { day: 'numeric', month: 'long', year: 'numeric' }),
         scores: results.scores,
         schoolLogoUrl: schoolLogo
       });
@@ -98,291 +95,226 @@ export default function ResultsPage() {
   if (!results) {
     return (
       <div className="container py-24 text-center space-y-4">
-        <h2 className="text-2xl font-bold text-primary">No results found</h2>
-        <Button onClick={() => router.push('/assessment')} className="bg-primary text-primary-foreground">Start Quiz</Button>
+        <h2 className="text-2xl font-black text-primary">Strategic Analysis Missing</h2>
+        <p className="text-muted-foreground">Complete the questionnaire to view your blueprint.</p>
+        <Button onClick={() => router.push('/assessment')} className="rounded-xl h-14 px-10 font-black">Start Quiz</Button>
       </div>
     );
   }
 
   const sortedIntelligences = Object.entries(results.scores || {}).sort(([, a]: any, [, b]: any) => b - a);
   const topThree = sortedIntelligences.slice(0, 3);
-  const formatScore = (score: number) => Math.round(score / 4);
-
-  const careers = getRecommendedCareers(results.scores);
-  const subjects = getRecommendedSubjects(results.scores, results.pathway);
-
-  // Chart Data
   const chartData = Object.entries(results.scores).map(([name, value]) => ({
     name,
     value: Math.round(value as number),
     fill: intelligenceMetadata[name]?.hex || '#4338ca'
   }));
 
-  const pieData = topThree.map(([name, value]) => ({
-    name,
-    value: value as number,
-    fill: intelligenceMetadata[name]?.hex || '#4338ca'
-  }));
-
   return (
-    <div className="min-h-screen bg-slate-100 p-4 md:p-8 flex flex-col items-center font-sans text-slate-900">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 flex flex-col items-center">
       {/* Action Bar */}
-      <div className="w-full max-w-[210mm] mb-6 flex justify-between items-center print:hidden">
-        <Button variant="ghost" onClick={() => router.push('/dashboard')} className="gap-2 text-slate-500 font-bold hover:text-[#4338ca]">
-          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+      <div className="w-full max-w-5xl mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 print:hidden">
+        <Button variant="ghost" onClick={() => router.push('/dashboard')} className="gap-2 text-slate-500 font-bold hover:text-primary">
+          <ArrowLeft className="h-4 w-4" /> Command Center
         </Button>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleDownload} disabled={isGenerating} className="gap-2 border-slate-200 font-bold text-[#4338ca] bg-white">
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={handleDownload} disabled={isGenerating} className="h-12 px-6 rounded-xl font-black border-primary/20 bg-white gap-2">
             {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            Download PDF Report
+            Export PDF Blueprint
           </Button>
-          <Button onClick={() => window.print()} className="gap-2 bg-[#4338ca] hover:bg-[#3730a3] font-bold text-white shadow-lg">
+          <Button onClick={() => window.print()} className="h-12 px-6 rounded-xl font-black shadow-xl gap-2">
             <Printer className="h-4 w-4" /> Print
           </Button>
         </div>
       </div>
 
-      {/* Report Container */}
-      <div className="w-full max-w-[210mm] bg-white shadow-2xl overflow-hidden min-h-[297mm] flex flex-col relative print:shadow-none print:m-0">
+      {/* Main Report Document */}
+      <div className="w-full max-w-5xl bg-white shadow-2xl rounded-[3rem] overflow-hidden border border-primary/5 flex flex-col">
         
-        {/* --- ZONE 1: EXECUTIVE HEADER --- */}
-        <header className="bg-[#4338ca] text-white p-6 relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-white opacity-10 rounded-full" />
-          
-          <div className="flex justify-between items-start relative z-10">
-            <div className="space-y-1">
-              <p className="text-[9px] font-bold tracking-widest uppercase opacity-90">
-                CAREERCOMPASS KENYA
-              </p>
-              <h1 className="text-2xl font-bold tracking-tight leading-none mb-1">Career Assessment Report</h1>
-              <p className="text-xs opacity-80 mb-3">
-                {results.userInfo?.school || 'Frere Town Secondary'} • {results.completedAt ? new Date(results.completedAt).toLocaleDateString('en-KE', { day: 'numeric', month: 'long', year: 'numeric' }) : '10 March 2026'}
-              </p>
+        {/* Header */}
+        <header className="bg-primary text-white p-12 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-12 opacity-10"><Brain className="h-48 w-48" /></div>
+          <div className="relative z-10 space-y-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-200">Official Intelligence Assessment</p>
+                <h1 className="text-4xl md:text-6xl font-black tracking-tighter">Career Intelligence Blueprint</h1>
+                <p className="text-xl font-medium opacity-90 mt-2">Designed by Sidmadina Technologies.</p>
+              </div>
+              <div className="hidden sm:block p-2 bg-white rounded-2xl shadow-2xl">
+                <img src={schoolLogo} alt="School Logo" className="h-20 w-20 object-contain" />
+              </div>
             </div>
-
-            <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center border border-white/30 p-1 overflow-hidden shadow-inner">
-              <img 
-                src={schoolLogo} 
-                alt="Logo" 
-                className="w-full h-full object-contain"
-              />
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-white/10">
+              <div><p className="text-[10px] font-black uppercase text-blue-200">Scholar</p><p className="font-bold text-lg">{results.userInfo?.name || 'Scholar'}</p></div>
+              <div><p className="text-[10px] font-black uppercase text-blue-200">Academic Level</p><p className="font-bold text-lg">{results.userInfo?.grade || 'Grade 10'}</p></div>
+              <div><p className="text-[10px] font-black uppercase text-blue-200">Institution</p><p className="font-bold text-lg">{results.userInfo?.school || 'Frere Town Secondary'}</p></div>
+              <div><p className="text-[10px] font-black uppercase text-blue-200">Report Date</p><p className="font-bold text-lg">{new Date().toLocaleDateString()}</p></div>
             </div>
           </div>
         </header>
 
-        {/* --- ZONE 2: IDENTIFICATION & PATHWAY --- */}
-        <section className="px-8 py-4 flex flex-col md:flex-row gap-4">
-          <div className="flex-1 bg-slate-50 border border-slate-200 rounded-lg p-3 flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center shrink-0">
-              <User size={20} />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-800">{results.userInfo?.name || 'Scholar'}</h2>
-              <p className="text-[10px] text-slate-500 uppercase font-medium">
-                {results.userInfo?.age || 'N/A'} Yrs • {results.userInfo?.grade || 'Grade 10'}
-              </p>
-            </div>
-          </div>
+        {/* Content Tabs/Sections */}
+        <div className="p-12 space-y-20">
           
-          <div className="w-full md:w-64 bg-emerald-500 text-white rounded-lg p-3 text-center flex flex-col justify-center shadow-md">
-            <span className="text-[9px] font-bold tracking-widest uppercase opacity-90">
-              RECOMMENDED PATHWAY
-            </span>
-            <p className="text-md font-bold">{results.pathway}</p>
-          </div>
-        </section>
+          {/* Section 1: Profile Summary */}
+          <section className="space-y-10">
+            <div className="flex items-center gap-4 border-l-8 border-primary pl-6">
+              <div className="p-3 bg-primary text-white rounded-2xl shadow-xl"><BarChart3 className="h-8 w-8" /></div>
+              <div>
+                <h2 className="text-3xl font-black">Intelligence Profile Summary</h2>
+                <p className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Performance Visual Analytics</p>
+              </div>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-10">
+              <div className="md:col-span-2 h-[400px] bg-muted/20 rounded-[2.5rem] p-10 border-2 border-dashed">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} layout="vertical">
+                    <XAxis type="number" hide domain={[0, 25]} />
+                    <YAxis dataKey="name" type="category" hide />
+                    <Tooltip 
+                      cursor={{ fill: 'transparent' }}
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontWeight: 'black' }}
+                    />
+                    <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={24}>
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-4">
+                 <div className="p-8 bg-primary text-white rounded-[2.5rem] shadow-xl text-center">
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Recommended Pathway</p>
+                    <p className="text-4xl font-black mt-2">{results.pathway}</p>
+                 </div>
+                 <div className="p-6 bg-white border-2 rounded-[2rem] space-y-4">
+                    <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Score Distribution</p>
+                    <div className="space-y-2">
+                       {sortedIntelligences.map(([name, score]: any) => (
+                         <div key={name} className="flex justify-between items-center text-xs font-black">
+                            <span className="text-muted-foreground">{name}</span>
+                            <span className={cn("px-2 py-0.5 rounded-md", intelligenceMetadata[name]?.bg, intelligenceMetadata[name]?.color.replace('bg-', 'text-'))}>
+                               {Math.round(score)}/25
+                            </span>
+                         </div>
+                       ))}
+                    </div>
+                 </div>
+              </div>
+            </div>
+          </section>
 
-        {/* --- ZONE 3: TOP INTELLIGENCES --- */}
-        <section className="px-8 mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Award className="text-slate-700" size={18} />
-            <h3 className="text-md font-bold text-slate-800 border-b-2 border-slate-800 pb-0.5">
-              Top Intelligences
-            </h3>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-3">
-            {topThree.map(([key, score]: any, i) => {
-              const meta = intelligenceMetadata[key];
-              const labels = ["PRIMARY", "SECONDARY", "TERTIARY"];
-              return (
-                <div key={key} className="bg-white border border-slate-100 rounded-lg shadow-sm flex flex-col items-center py-3 relative overflow-hidden group hover:border-indigo-200 transition-colors">
-                  <div className={cn("absolute top-0 left-0 right-0 h-1", meta.color)} />
-                  <span className="text-[8px] font-bold text-indigo-600 mb-1 tracking-tighter">{labels[i]}</span>
-                  <span className="text-[11px] font-bold text-slate-700 mb-2 text-center px-1 leading-tight">{meta.label}</span>
-                  <div className="flex items-baseline">
-                    <span className="text-2xl font-black text-slate-800">{formatScore(score)}</span>
-                    <span className="text-[10px] text-slate-400 font-bold ml-0.5">/25</span>
+          {/* Section 2: Top Dominant Intelligences */}
+          <section className="space-y-12">
+            <div className="flex items-center gap-4 border-l-8 border-secondary pl-6">
+              <div className="p-3 bg-secondary text-white rounded-2xl shadow-xl"><Award className="h-8 w-8" /></div>
+              <div>
+                <h2 className="text-3xl font-black">Top Dominant Intelligences</h2>
+                <p className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Core Professional Pillars</p>
+              </div>
+            </div>
+
+            <div className="grid gap-8">
+              {topThree.map(([name, score]: any, i) => {
+                const meta = INTEL_DESCRIPTIONS[name as keyof typeof INTEL_DESCRIPTIONS];
+                const styles = intelligenceMetadata[name as keyof typeof intelligenceMetadata];
+                return (
+                  <Card key={name} className="border-none shadow-xl rounded-[2.5rem] overflow-hidden group hover:-translate-y-1 transition-all">
+                    <div className={cn("h-3 w-full", styles.color)} />
+                    <CardHeader className="p-10 flex flex-col md:flex-row justify-between items-start gap-6 bg-muted/30">
+                      <div className="space-y-2">
+                        <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Dominance Ranking: #{i+1}</span>
+                        <CardTitle className="text-4xl font-black">{name}</CardTitle>
+                        <Badge className={cn("font-black", styles.bg, styles.color.replace('bg-', 'text-'))}>{getLevel(score)} ({score}/25)</Badge>
+                      </div>
+                      <div className="p-4 bg-white rounded-2xl shadow-sm italic text-muted-foreground font-medium max-w-sm">
+                        "{meta.desc}"
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-10 grid md:grid-cols-2 gap-12">
+                      <div className="space-y-6">
+                        <div className="space-y-3">
+                          <h4 className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-primary"><Zap size={14} /> Key Strengths</h4>
+                          <div className="flex flex-wrap gap-2">{meta.strengths.map(s => <Badge key={s} variant="secondary" className="rounded-lg">{s}</Badge>)}</div>
+                        </div>
+                        <div className="space-y-3">
+                          <h4 className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-primary"><Briefcase size={14} /> Career Trajectories</h4>
+                          <div className="flex flex-wrap gap-2">{meta.careers.map(c => <Badge key={c} variant="outline" className="rounded-lg border-primary/20">{c}</Badge>)}</div>
+                        </div>
+                      </div>
+                      <div className="p-8 bg-muted/20 rounded-[2rem] border-2 border-dashed space-y-4">
+                        <h4 className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-muted-foreground"><Lightbulb size={14} /> Best Learning Style</h4>
+                        <ul className="space-y-2">
+                          {meta.styles.map(s => <li key={s} className="text-sm font-bold text-slate-700 flex items-start gap-2"><div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5" /> {s}</li>)}
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Section 3: Recommended Clusters & Strategies */}
+          <div className="grid md:grid-cols-2 gap-10">
+            <Card className="rounded-[3rem] border-none shadow-2xl bg-primary text-white p-12 overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-8 opacity-10"><Target size={120} /></div>
+              <h3 className="text-3xl font-black mb-8">Career Clusters</h3>
+              <div className="grid gap-3">
+                {["STEM Careers", "Health Sciences", "Creative Arts & Design", "Agriculture & Environment", "Public Service & Leadership"].map(c => (
+                  <div key={c} className="p-4 bg-white/10 rounded-2xl border border-white/10 font-bold flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-secondary shadow-2xl" /> {c}
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* --- VISUAL ANALYTICS --- */}
-        <section className="px-8 mb-6 grid grid-cols-1 md:grid-cols-2 gap-6 print:hidden">
-          <Card className="border-slate-100 shadow-sm">
-            <div className="p-4 flex items-center gap-2 border-b">
-              <BarChart3 className="h-4 w-4 text-primary" />
-              <h4 className="text-xs font-bold uppercase tracking-wider">Score Distribution</h4>
-            </div>
-            <CardContent className="h-[200px] pt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" hide />
-                  <YAxis domain={[0, 100]} hide />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '10px' }}
-                    labelStyle={{ fontWeight: 'bold' }}
-                  />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card className="border-slate-100 shadow-sm">
-            <div className="p-4 flex items-center gap-2 border-b">
-              <PieChartIcon className="h-4 w-4 text-primary" />
-              <h4 className="text-xs font-bold uppercase tracking-wider">Strength Composition</h4>
-            </div>
-            <CardContent className="h-[200px] pt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={70}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '10px' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </section>
-
-        {/* --- ZONE: CAREERS & RECOMMENDED ELECTIVES --- */}
-        <section className="px-8 mb-6 grid grid-cols-2 gap-4">
-          {/* Careers */}
-          <div className="bg-indigo-50/50 border border-indigo-100 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-3 text-indigo-700">
-              <Briefcase size={16} />
-              <h4 className="text-[11px] font-bold uppercase tracking-wider">Recommended Careers</h4>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {careers.map(career => (
-                <span key={career} className="bg-white border border-indigo-200 text-indigo-700 text-[10px] px-2 py-0.5 rounded-full font-medium shadow-sm">
-                  {career}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Recommended Elective Subjects */}
-          <div className="bg-amber-50/50 border border-amber-100 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-3 text-amber-700">
-              <ListChecks size={16} />
-              <h4 className="text-[11px] font-bold uppercase tracking-wider">Recommended 3 Electives</h4>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {subjects.map(elective => (
-                <span key={elective} className="bg-white border border-amber-200 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-medium shadow-sm">
-                  {elective}
-                </span>
-              ))}
-            </div>
-            <p className="text-[9px] text-amber-600/70 mt-3 italic leading-tight">
-              Selection based on talent alignment & pathway suitability.
-            </p>
-          </div>
-        </section>
-
-        {/* --- ZONE 4: QUALITATIVE INSIGHTS --- */}
-        <section className="px-8 mb-6">
-          <div className="grid grid-cols-3 gap-4 bg-slate-50 rounded-lg p-4 border border-slate-100 shadow-sm">
-            <div>
-              <h4 className="text-[9px] font-bold text-indigo-700 uppercase tracking-widest border-b border-indigo-200 mb-2">Interests</h4>
-              <ul className="space-y-1">
-                {getRecommendedInterests(results.scores).slice(0, 3).map(item => (
-                  <li key={item} className="text-[10px] text-slate-600 flex items-start gap-1"><span className="text-indigo-400">•</span> {item}</li>
                 ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-[9px] font-bold text-emerald-700 uppercase tracking-widest border-b border-emerald-200 mb-2">Passions</h4>
-              <ul className="space-y-1">
-                {getRecommendedPassions(results.scores).slice(0, 3).map(item => (
-                  <li key={item} className="text-[10px] text-slate-600 flex items-start gap-1"><span className="text-emerald-400">•</span> {item}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-[9px] font-bold text-cyan-700 uppercase tracking-widest border-b border-cyan-200 mb-2">Abilities</h4>
-              <ul className="space-y-1">
-                {getRecommendedAbilities(results.scores).slice(0, 3).map(item => (
-                  <li key={item} className="text-[10px] text-slate-600 flex items-start gap-1"><span className="text-cyan-400">•</span> {item}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
+              </div>
+            </Card>
 
-        {/* --- ZONE 5: FULL PROFILE --- */}
-        <section className="px-8 mb-6 flex-grow">
-          <div className="flex items-center gap-2 mb-4">
-            <Brain className="text-slate-700" size={18} />
-            <h3 className="text-md font-bold text-slate-800 border-b-2 border-slate-800 pb-0.5">
-              Full Intelligence Profile
-            </h3>
+            <Card className="rounded-[3rem] border-none shadow-2xl bg-white p-12 overflow-hidden">
+               <h3 className="text-3xl font-black mb-8">Study Strategy</h3>
+               <div className="space-y-6">
+                  {topThree.map(([name]: any) => (
+                    <div key={name} className="p-6 bg-muted/30 rounded-2xl space-y-2">
+                       <h4 className="text-[10px] font-black uppercase text-primary tracking-widest">{name} Mode</h4>
+                       <p className="text-sm font-bold text-slate-700">{INTEL_DESCRIPTIONS[name as keyof typeof INTEL_DESCRIPTIONS].strategies[0]}</p>
+                    </div>
+                  ))}
+               </div>
+            </Card>
           </div>
-          
-          <div className="space-y-2">
-            {sortedIntelligences.map(([key, score]: any) => {
-              const meta = intelligenceMetadata[key];
-              return (
-                <div key={key} className="flex items-center gap-3 group">
-                  <div className="w-24 text-right shrink-0">
-                    <span className="text-[9px] font-bold text-slate-600 uppercase leading-none group-hover:text-indigo-600 transition-colors">{meta.label}</span>
-                  </div>
-                  <div className="flex-grow h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div className={cn("h-full opacity-80 group-hover:opacity-100 transition-opacity", meta.color)} style={{ width: `${score}%` }} />
-                  </div>
-                  <div className="w-10 text-left shrink-0">
-                    <span className="text-[9px] font-black text-slate-400">{formatScore(score)}/25</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
 
-        {/* --- ZONE 6: FOOTER --- */}
-        <footer className="bg-[#4338ca] text-white p-4 mt-auto">
-          <div className="text-center">
-            <p className="text-[9px] font-bold opacity-90 mb-0.5">
-              CareerCompass Kenya | Designed by Sidmadina Technologies
-            </p>
-            <p className="text-[8px] opacity-60 uppercase tracking-tighter">
-              Kenya's Competency-Based Education (CBE) System Alignment
-            </p>
+          {/* Section 4: Guidance Summary */}
+          <section className="bg-secondary text-white p-16 rounded-[4rem] text-center space-y-8 relative overflow-hidden shadow-2xl">
+             <div className="absolute inset-0 opacity-10 pointer-events-none">
+                <Brain className="h-[600px] w-[600px] -bottom-40 -left-40 absolute" />
+             </div>
+             <h3 className="text-4xl font-black">Strategic Guidance Summary</h3>
+             <p className="text-xl font-medium max-w-3xl mx-auto opacity-90">Your intelligence profile indicates strong potential in {topThree[0][0]} and {topThree[1][0]}. We recommend focusing on the {results.pathway} pathway for Senior School specialization.</p>
+             <div className="flex flex-wrap justify-center gap-4 pt-4">
+                <Button variant="secondary" className="rounded-2xl h-16 px-10 text-lg font-black bg-white text-secondary hover:bg-white/90">Explore University Courses</Button>
+                <Button variant="ghost" className="rounded-2xl h-16 px-10 text-lg font-black text-white hover:bg-white/10">Consult a Counselor</Button>
+             </div>
+          </section>
+
+        </div>
+
+        {/* Footer */}
+        <footer className="bg-primary text-white p-12 border-t border-white/10">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="text-center md:text-left">
+              <p className="text-lg font-black tracking-tighter">CAREERCOMPASS KENYA</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mt-1">Discover. Learn. Succeed.</p>
+            </div>
+            <div className="text-center md:text-right">
+               <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Designed by Sidmadina Technologies.</p>
+               <p className="text-xs font-medium opacity-60 mt-1">© {new Date().getFullYear()} Official Career Blueprint System.</p>
+            </div>
           </div>
         </footer>
+
       </div>
     </div>
   );
